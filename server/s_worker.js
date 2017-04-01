@@ -5,6 +5,7 @@ var User = require('./s_user.js');
 var Game = require('./s_game.js');
 var Mysql = require('./s_mysql.js');
 
+
 var transfer = new Transfer();
 var user = new User();
 var game = new Game();
