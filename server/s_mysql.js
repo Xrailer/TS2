@@ -7,10 +7,10 @@ class Mysql
 	INIT()
 	{
 		connection = mysql.createConnection({
-		host     : config.MY_HOST,
-		user     : config.MY_USER,
-		password : config.MY_PASS,
-				  database : config.MY_DB
+			host     : config.MY_HOST,
+			user     : config.MY_USER,
+			password : config.MY_PASS,
+			database : config.MY_DB
 		});
 		/*var pool  = mysql.createPool({
 		  connectionLimit : 10,
