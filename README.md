@@ -4,7 +4,7 @@
 #
 # 1.download Node Js
 # 2.install Node Js
-# 3.download server
+# 3.download server files on github
 # 4.extract server to c:\ts2
 # 5.open cmd > cd c:\ts2 > enter > npm install
 # 6.restore game.sql in mysql folder to mysql server
