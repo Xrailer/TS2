@@ -1,0 +1,22 @@
+{
+  "name": "ts2_ns",
+  "version": "1.0.0",
+  "description": "Twelve Sky2 project with Node.js",
+  "main": "main.js",
+  "scripts": {
+    "test": "s"
+  },
+  "repository": {
+    "type": "git",
+    "url": "a"
+  },
+  "keywords": [
+    "twelvesky2"
+  ],
+  "author": "DOS",
+  "license": "GNU GPL",
+  "dependencies": {
+    "mysql": "^2.13.0",
+    "net": "^1.0.2"
+  }
+}
