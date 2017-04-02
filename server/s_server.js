@@ -67,7 +67,7 @@ this.INIT = function( callback )
 this.Accept = function( socket )
 {
 	var tID = user.GetConnectPlayer();
-	if( tID >= user.maxUser )
+	if( tID >= config.MAX_USER_FOR_LOGIN )
 	{
 		console.log('max user', tID);
 		socket.destroy();
