@@ -3,6 +3,8 @@ this.WORKER_SIZE = 256;
 
 this.LOGIN_IP = '127.0.0.1';
 this.LOGIN_PO = 11091;
+this.MAX_USER_FOR_LOGIN = 1000;
+
 this.MY_HOST = '127.0.0.1';
 this.MY_PORT = 3306;
 this.MY_USER = 'root';
