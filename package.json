@@ -1,10 +1,10 @@
 {
-  "name": "ts2_ns",
+  "name": "TS2",
   "version": "1.0.0",
-  "description": "Twelve Sky2 project with Node.js",
+  "description": "Twelve Sky2 on Node JS",
   "main": "main.js",
   "scripts": {
-    "test": "s"
+    "test": "abcdefghijklmnopqrstuvwxyz"
   },
   "repository": {
     "type": "git",
