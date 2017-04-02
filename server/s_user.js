@@ -1,17 +1,7 @@
 var struct = require('../struct');
 this.INIT = function( callback )
 {
-	this.maxUser = 2;
-	/*this.mCheckConnectState = [];
-	this.mCheckValidState = [];
-	this.uID = [];
-	this.uUserSort = [];
-	this.uMousePassword = [];
-	this.mSecondLoginSort = [];
-	this.mSecondLoginTryNum = [];
-	this.uUsedTime = [];
-	this.uIP = [];
-	this.uAvatar = [];*/
+	this.maxUser = config.MAX_USER_FOR_LOGIN;
 	this.mUSER = [];
 	for(var index01 = 0; index01 < this.maxUser; index01++)
 	{
