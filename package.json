@@ -17,6 +17,7 @@
   "license": "GNU GPL",
   "dependencies": {
     "mysql": "^2.13.0",
-    "net": "^1.0.2"
+    "net": "^1.0.2",
+    "restruct": "^0.1.3"
   }
 }

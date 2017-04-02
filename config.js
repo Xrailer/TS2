@@ -2,20 +2,26 @@ this.VERSION = 90359;
 this.WORKER_SIZE = 256;
 
 this.LOGIN_IP = '127.0.0.1';
+this.LOGIN_PO = 11091;
 this.MY_HOST = '127.0.0.1';
+this.MY_PORT = 3306;
 this.MY_USER = 'root';
-this.MY_PASS = '';
+this.MY_PASS = 'dos';
 this.MY_DB = 'game';
-this.MY_TB01 = 'DefineMaxUerNum';
+this.MY_TB01 = 'DefineMaxUserNum';
 this.MY_TB02 = 'MemberInfo';
 this.MY_TB03 = 'AvatarInfo';
+this.MY_TB04 = 'MasterInfo';
 
 this.MAX_USER_ID_LENGTH = 101;
 this.MAX_USER_PASSWORD_LENGTH = 101;
 this.MAX_MOUSE_PASSWORD_LENGTH = 5;
 
+this.MAX_USER_AVATAR_NUM = 3;
+this.MAX_AVATAR_NAME_LENGTH = 13;
+
 //CLIENT -> LOGIN;
-this.P_LOGIN_SEND = 11 ;
+this.P_LOGIN_SEND = 11;
 this.S_LOGIN_SEND = 13 + this.MAX_USER_ID_LENGTH + this.MAX_USER_PASSWORD_LENGTH;
 this.P_CLIENT_OK_FOR_LOGIN_SEND = 12 ;
 this.S_CLIENT_OK_FOR_LOGIN_SEND = 9;
@@ -27,7 +33,7 @@ this.P_LOGIN_MOUSE_PASSWORD_SEND = 15;
 this.S_LOGIN_MOUSE_PASSWORD_SEND = 9 + this.MAX_MOUSE_PASSWORD_LENGTH;
 
 //LOGIN -> CLIENT;
-this.P_LOGIN_RECV = 11 ;
+this.P_LOGIN_RECV = 11;
 this.S_LOGIN_RECV = 339;
 this.P_USER_AVATAR_INFO = 12;
 this.S_USER_AVATAR_INFO = 7897;
