@@ -1,9 +1,9 @@
-this.INIT = function()
+this.INIT = function( callback )
 {
 	this.config = require('../config');
 	this.packet = new Buffer(10000);
 	this.packets = 0;
-	return true;
+	return callback(true);
 }
 this.B_CONNECT_OK = function( tRandomNumber, tMaxPlayerNum, tGagePlayerNum, tPresentPlayerNum )
 {
@@ -29,7 +29,7 @@ this.B_LOGIN_RECV = function( tResult, tID, tUserSort, tSecondLoginSort, tMouseP
 	this.packet.writeInt32LE( tUserSort, ( 5 + this.config.MAX_USER_ID_LENGTH ) );
 	this.packet.writeInt32LE( tSecondLoginSort, ( 5 + this.config.MAX_USER_ID_LENGTH + 16 ) );
 	this.packet.write( tMousePassword.toString(), ( 5 + this.config.MAX_USER_ID_LENGTH + 20 ) );
-	console.log(this.packet);
+	//console.log(this.packet);
 	return this.packet;
 }
 this.B_USER_AVATAR_INFO = function()
@@ -71,4 +71,4 @@ this.B_RCMD_WORLD_SEND = function()
 	//console.log(this.packet);
 	return this.packet;
 }
-module.exports = this;//Transfer;
+module.exports = this;

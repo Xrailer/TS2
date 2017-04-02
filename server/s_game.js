@@ -1,7 +1,27 @@
-this.INIT = function()
+var mysql = require('./s_mysql');
+this.INIT = function( callback )
 {
+	this.mTickCount = 0;
+	this.mMaxPlayerNum = 0;
+	this.mAddPlayerNum = 0;
+	this.mGagePlayerNum = 0;
+	this.mPresentPlayerNum = 0;
 	this.tUnicode;
-	return true;
+	
+	mysql.DB_PROCESS_01( function( callback ) 
+	{
+		if(callback == false)
+		{
+			console.log("Error::Mysql DB_PROCESS_01()");
+			process.exit(1);
+			return;
+		}
+	});	
+	return callback(true);
+}
+this.GetTickCount = function()
+{
+	return process.hrtime()[0];
 }
 this.CheckNameString = function(string)
 {

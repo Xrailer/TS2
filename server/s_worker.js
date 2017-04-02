@@ -2,12 +2,10 @@ var config = require('../config');
 var transfer = require('./s_transfer');
 var game = require('./s_game');
 var mysql = require('./s_mysql');
-
-
 var user = require('./s_user');
 
 
-this.INIT = function()
+this.INIT = function( callback )
 {
 	this.WORKER_PACKETSIZE = [];
 	this.WORKER_FUNCTION = [];
@@ -40,7 +38,7 @@ this.INIT = function()
 	WORKER_FUNCTION[config.P_DEMAND_ZONE_SERVER_INFO_1] = S_DEMAND_ZONE_SERVER_INFO_1;
 	WORKER_PACKETSIZE[config.P_FAIL_MOVE_ZONE_1_SEND] = 'W_FAIL_MOVE_ZONE_1_SEND';
 	WORKER_FUNCTION[config.P_FAIL_MOVE_ZONE_1_SEND] = S_FAIL_MOVE_ZONE_1_SEND;*/
-	return true;
+	return callback(true);
 }
 this.W_FUNCTION = function(workerID)
 {
@@ -52,7 +50,13 @@ this.W_SIZE = function(workerID)
 }
 this.W_LOGIN_SEND = function( socket, tUserIndex, tData )
 {
-	//console.log("working W_LOGIN_SEND");	
+	if( user.mUSER[tUserIndex].uCheckValidState )
+	{
+		socket.destroy();
+		return;
+	}
+	user.mUSER[tUserIndex].uUsedTime = game.GetTickCount();
+
 	var tPacket = Buffer(tData);
 	var tID = new Buffer(config.MAX_USER_ID_LENGTH).fill(0);
 	var tPassword = new Buffer(config.MAX_USER_PASSWORD_LENGTH).fill(0);
@@ -70,84 +74,93 @@ this.W_LOGIN_SEND = function( socket, tUserIndex, tData )
 	if( tVersion != config.VERSION )
 	{
 		transfer.B_LOGIN_RECV(4, tID, 0, 0, "0000");
-		user.Send(socket, tUserIndex, true, transfer.packet, transfer.packets);
-		for( index01 = 0 ; index01 < 3 ; index01++ )
+		user.Send( socket, tUserIndex, true, transfer.packet, transfer.packets );
+		for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 		{
 			transfer.B_USER_AVATAR_INFO();	
-			user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+			user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 		}
 		transfer.B_RCMD_WORLD_SEND();
-		user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+		user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 	}
 	if( ( game.CheckNameString(tID) === false ) || ( game.CheckNameString(tPassword) === false) )
 	{
-		transfer.B_LOGIN_RECV(6, tID, 0, 0, "0000");
-		user.Send(socket, tUserIndex, true, transfer.packet, transfer.packets);
-		for( index01 = 0 ; index01 < 3 ; index01++ )
+		transfer.B_LOGIN_RECV( 6, tID, 0, 0, "0000" );
+		user.Send( socket, tUserIndex, true, transfer.packet, transfer.packets );
+		for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 		{
 			transfer.B_USER_AVATAR_INFO();	
-			user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+			user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 		}
 		transfer.B_RCMD_WORLD_SEND();
-		user.Send(socket, tUserIndex, true, transfer.packet, transfer.packets);
+		user.Send( socket, tUserIndex, true, transfer.packet, transfer.packets );
 	}
-	var tResult;
-	var uID;
-	var uUserSort;
-	var uMousePassword;
-	mysql.DB_PROCESS_02( tUserIndex, game.BufToStr(tID), game.BufToStr(tPassword), function( tResult, uID, uUserSort, uMousePassword )
+	
+	mysql.DB_PROCESS_02( tUserIndex, game.BufToStr(tID), game.BufToStr(tPassword), user.mUSER[tUserIndex].uIP, function( tResult, uID, uUserSort, uMousePassword )
 	{
 		if(tResult != 0)
 		{
-			transfer.B_LOGIN_RECV(tResult, tID, 0, 0, "0000");
+			transfer.B_LOGIN_RECV( tResult, tID, 0, 0, "0000" );
 			user.Send(socket, tUserIndex, true, transfer.packet, transfer.packets);
-			for( index01 = 0 ; index01 < 3 ; index01++ )
+			for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 			{
 				transfer.B_USER_AVATAR_INFO();	
-				user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+				user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 			}
 			transfer.B_RCMD_WORLD_SEND();
-			user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+			user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 			return;
 		}
-		user.uID[tUserIndex] = uID;
-		user.uUserSort[tUserIndex] = uUserSort;
-		user.uMousePassword[tUserIndex] = uMousePassword;
-		user.mSecondLoginSort[tUserIndex] = 1;
-		user.mSecondLoginTryNum[tUserIndex] = 0;		
-		if (user.uMousePassword[tUserIndex] != '')
+		user.mUSER[tUserIndex].uCheckValidState = true;
+		user.mUSER[tUserIndex].uID = uID;
+		user.mUSER[tUserIndex].uUserSort = uUserSort;
+		user.mUSER[tUserIndex].uMousePassword = uMousePassword;
+		user.mUSER[tUserIndex].uSecondLoginSort = 1;
+		user.mUSER[tUserIndex].uSecondLoginTryNum = 0;		
+		if (user.mUSER[tUserIndex].uMousePassword != '')
 		{
 			tMousePassword = '****';
 		}
 		
 		//coneolse.log("success to login");
-		transfer.B_LOGIN_RECV(0, user.uID[tUserIndex], user.uUserSort[tUserIndex], user.mSecondLoginSort[tUserIndex], tMousePassword);
+		transfer.B_LOGIN_RECV( 0, user.mUSER[tUserIndex].uID, user.mUSER[tUserIndex].uUserSort, user.mUSER[tUserIndex].uSecondLoginSort, tMousePassword );
 		user.Send(socket, tUserIndex, true, transfer.packet, transfer.packets);
-		for( index01 = 0 ; index01 < 3 ; index01++ )
+		for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 		{
 			transfer.B_USER_AVATAR_INFO();	
-			user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+			user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 		}
 		transfer.B_RCMD_WORLD_SEND();
-		user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+		user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 	});
 }
 this.W_CLIENT_OK_FOR_LOGIN_SEND = function( socket, tUserIndex, tData )
-{	
-	
+{
+	if( !user.mUSER[tUserIndex].uCheckValidState )
+	{
+		socket.destroy();
+		return;
+	}
+	user.mUSER[tUserIndex].uUsedTime = game.GetTickCount();
 }
 this.W_CREATE_MOUSE_PASSWORD_SEND = function( socket, tUserIndex, tData )
 {
-	if (user.mSecondLoginSort[tUserIndex] != 1)
+	if( !user.mUSER[tUserIndex].uCheckValidState )
 	{
 		socket.destroy();
 		return;
 	}
-	if (user.uMousePassword[tUserIndex] != '')
+	if ( user.mUSER[tUserIndex].uSecondLoginSort != 1 )
 	{
 		socket.destroy();
 		return;
 	}
+	if ( user.mUSER[tUserIndex].uMousePassword != '' )
+	{
+		socket.destroy();
+		return;
+	}
+	user.mUSER[tUserIndex].uUsedTime = game.GetTickCount();
 	
 	var tMousePassword = new Buffer(config.MAX_MOUSE_PASSWORD_LENGTH).fill(0);
 	var tPacket = Buffer(tData).copy( tMousePassword, 0, 0, (config.MAX_MOUSE_PASSWORD_LENGTH - 1) );
@@ -155,14 +168,14 @@ this.W_CREATE_MOUSE_PASSWORD_SEND = function( socket, tUserIndex, tData )
 	for (var index01 = 0; index01 < 4; index01++)
 	{
 		//console.log(parseInt(tMousePassword[index01]));
-		if ( (parseInt(tMousePassword[index01]) < 48) && (parseInt(tMousePassword[index01]) > 57) ) //0-9
+		if ( ( parseInt( tMousePassword[index01] ) < 48 ) && ( parseInt( tMousePassword[index01] ) > 57 ) ) //0-9
 		{
 			socket.destroy();
 			return;
 		}
 	}
-	var tResult;
-	mysql.DB_PROCESS_03( game.BufToStr(user.uID[tUserIndex]), game.BufToStr(tMousePassword), function(tResult)
+	
+	mysql.DB_PROCESS_03( game.BufToStr(user.uID[tUserIndex]), game.BufToStr(tMousePassword), function( tResult )
 	{
 		if(tResult != 0)
 		{
@@ -170,46 +183,57 @@ this.W_CREATE_MOUSE_PASSWORD_SEND = function( socket, tUserIndex, tData )
 			user.Send( socket, tUserIndex, true, transfer.packet, transfer.packets );
 			return;
 		}
-		user.uMousePassword[tUserIndex] = tMousePassword;
-		user.mSecondLoginSort[tUserIndex] = 0;
-		transfer.B_CREATE_MOUSE_PASSWORD_RECV( 0, user.uMousePassword[tUserIndex] );
-			user.Send( socket, tUserIndex, true, transfer.packet, transfer.packets );
+		user.mUSER[tUserIndex].uMousePassword = tMousePassword;
+		user.mUSER[tUserIndex].uSecondLoginSort = 0;
+		transfer.B_CREATE_MOUSE_PASSWORD_RECV( 0, user.mUSER[tUserIndex].uMousePassword );
+		user.Send( socket, tUserIndex, true, transfer.packet, transfer.packets );
 	});
 }
-this.W_CHANGE_MOUSE_PASSWORD_SEND = function(socket, tUserIndex, tData)
+this.W_CHANGE_MOUSE_PASSWORD_SEND = function( socket, tUserIndex, tData )
 {
-	
+	if( !user.mUSER[tUserIndex].uCheckValidState )
+	{
+		socket.destroy();
+		return;
+	}
+	user.mUSER[tUserIndex].uUsedTime = game.GetTickCount();
 }
-this.W_LOGIN_MOUSE_PASSWORD_SEND = function (socket, tUserIndex, tData)
+this.W_LOGIN_MOUSE_PASSWORD_SEND = function ( socket, tUserIndex, tData )
 {
-	if (user.mSecondLoginSort[tUserIndex] != 1)
+	if( !user.mUSER[tUserIndex].uCheckValidState )
+	{
+		socket.destroy();
+		return;
+	}	
+	if ( user.mUSER[tUserIndex].uSecondLoginSort != 1 )
 	{
 		socket.destroy();
 		return;
 	}
-	if (user.uMousePassword[tUserIndex] == '')
+	if ( user.mUSER[tUserIndex].uMousePassword == '' )
 	{
 		socket.destroy();
 		return;
 	}
+	user.mUSER[tUserIndex].uUsedTime = game.GetTickCount();
 	
 	var tMousePassword = new Buffer(config.MAX_MOUSE_PASSWORD_LENGTH).fill(0);
 	var tPacket = Buffer(tData).copy( tMousePassword, 0, 0, (config.MAX_MOUSE_PASSWORD_LENGTH - 1) );
 
 	for ( var index01 = 0; index01 < 4; index01++ )
 	{
-		if ( (parseInt(tMousePassword[index01]) < 48) && (parseInt(tMousePassword[index01]) > 57) ) //0-9
-		{
+		if ( ( parseInt( tMousePassword[index01] ) < 48 ) && ( parseInt( tMousePassword[index01] ) > 57 ) ) //0-9
+		{	
 			socket.destroy();
 			return;
 		}
 	}
 	
-	if ( user.uMousePassword[tUserIndex] != game.BufToStr(tMousePassword) )
+	if ( user.mUSER[tUserIndex].uMousePassword != game.BufToStr(tMousePassword) )
 	{
-		console.log("mismatch 2nd password : wrong : %s, real : %s",  user.uMousePassword[tUserIndex], game.BufToStr(tMousePassword));
-		transfer.B_LOGIN_MOUSE_PASSWORD_RECV(1);
-		user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+		console.log("mismatch 2nd password : wrong : %s, real : %s",  user.mUSER[tUserIndex].uMousePassword, game.BufToStr(tMousePassword));
+		transfer.B_LOGIN_MOUSE_PASSWORD_RECV( 1 );
+		user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 		user.mSecondLoginTryNum[tUserIndex]++;
 		if (user.mSecondLoginTryNum[tUserIndex] == 3)
 		{
@@ -220,8 +244,8 @@ this.W_LOGIN_MOUSE_PASSWORD_SEND = function (socket, tUserIndex, tData)
 		return;
 	}
 	//coneolse.log("success to login 2nd password");
-	user.mSecondLoginSort[tUserIndex] = 0;
-	transfer.B_LOGIN_MOUSE_PASSWORD_RECV(0);
-	user.Send(socket,tUserIndex, true, transfer.packet, transfer.packets);
+	user.mUSER[tUserIndex].uSecondLoginSort = 0;
+	transfer.B_LOGIN_MOUSE_PASSWORD_RECV( 0 );
+	user.Send( socket,tUserIndex, true, transfer.packet, transfer.packets );
 }
 module.exports = this;

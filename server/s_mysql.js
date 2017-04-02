@@ -2,14 +2,15 @@ var mysql = require('mysql');
 var config = require('../config');
 var game = require('./s_game');
 var connection;
-this.INIT = function( host, user, pass, database)
+this.INIT = function( host, port, user, pass, database, callback)
 {
-	if( (host == undefined) || (user == undefined) || (pass == undefined) || (database == undefined) )
+	if( (host == undefined) || (port == undefined) || (user == undefined) || (pass == undefined) || (database == undefined) )
 	{
 		return false;
 	}
 	connection = mysql.createConnection({
 		host     : host,
+		port     : port,
 		user     : user,
 		password : pass,
 		database : database
@@ -21,19 +22,33 @@ this.INIT = function( host, user, pass, database)
 	  password : config.MY_PASS,
 	  database : config.MY_DB
 	});*/
-	connection.connect(function(err)
+	connection.connect( function(err)
 	{
 		if (err)
 		{
-			console.error('error connecting: ' + err.stack);
-			return false;
+			console.error('error connecting: ' + err.code);
+			return callback(false);
 		}
 	});
-	return true;
-}	
-this.DB_PROCESS_02 = function(tUserIndex, tID, tPassword, callback)
+	return callback(true);
+}
+this.DB_PROCESS_01 = function( callback )
 {
-	var uLoginState;
+	connection.query('select * from ??', [config.MY_TB01], function(err, result)
+	{
+		if (err)
+		{
+			console.log("Query Login ERROR : ", err);
+			return callback(false);
+		}
+		game.mMaxPlayerNum = result[0].mMaxUserNum;
+		game.mAddPlayerNum = result[0].mAddPlayerNum;
+		game.mGagePlayerNum = result[0].mGageUserNum;
+	});
+	return callback(true);
+}
+this.DB_PROCESS_02 = function(tUserIndex, tID, tPassword, tIP, callback)
+{
 	var uSaveMoney;
 	var uSaveMoney2;
 	var uSaveItem;
