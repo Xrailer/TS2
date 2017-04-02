@@ -1,9 +1,9 @@
 var struct = require('../struct');
+var config = require('../config');
 this.INIT = function( callback )
 {
-	this.maxUser = config.MAX_USER_FOR_LOGIN;
 	this.mUSER = [];
-	for(var index01 = 0; index01 < this.maxUser; index01++)
+	for(var index01 = 0; index01 < config.MAX_USER_FOR_LOGIN; index01++)
 	{
 		this.mUSER[index01] = {
 			'uID' : index01,
@@ -30,16 +30,16 @@ this.INIT = function( callback )
 this.GetConnectPlayer = function()
 {
 	var index01;
-	for( index01 = 0; index01 < this.maxUser; index01++ )
+	for( index01 = 0; index01 < config.MAX_USER_FOR_LOGIN; index01++ )
 	{
 		if(this.mUSER[index01].uCheckConnectState === false)
 		{
 			break;
 		}
 	}
-	if(index01 == this.maxUser)
+	if(index01 >= config.MAX_USER_FOR_LOGIN)
 	{
-		return this.maxUser;
+		return config.MAX_USER_FOR_LOGIN;
 	}
 	this.mUSER[index01].uCheckConnectState = true;
 	this.mUSER[index01].uCheckValidState = false;
