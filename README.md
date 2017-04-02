@@ -1,5 +1,5 @@
-# TS2
-#
+# TS2.5
+===
 # Set up
 1.download Node Js
 
@@ -17,24 +17,18 @@
 
 8.copy TwelveSky2.exe in client folder to TS25ELW
 
----------------
+===
 # Progress
----------------
+===
+
 Login Server 10%
+- Login Account 30%
+- Login 2nd Password 100%
+- Create 2nd Password 100%
+- Create Character 0%
+- Delete Character 0%
+- Enter World 0%
 
-Login Account 30%
-
-Login 2nd Password 100%
-
-Create 2nd Password 100%
-
-Create Character 0%
-
-Delete Character 0%
-
-Enter World 0%
-
----------------
 Game Server 0%
 
----------------
+===
