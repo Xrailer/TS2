@@ -10,10 +10,25 @@ Target Server Type    : MYSQL
 Target Server Version : 50505
 File Encoding         : 65001
 
-Date: 2017-04-01 16:57:31
+Date: 2017-04-02 20:32:24
 */
 
 SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for `definemaxusernum`
+-- ----------------------------
+DROP TABLE IF EXISTS `definemaxusernum`;
+CREATE TABLE `definemaxusernum` (
+  `mMaxUserNum` int(11) DEFAULT NULL,
+  `mAddPlayerNum` int(11) DEFAULT NULL,
+  `mGageUserNum` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- ----------------------------
+-- Records of definemaxusernum
+-- ----------------------------
+INSERT INTO `definemaxusernum` VALUES ('1000', '1', '50');
 
 -- ----------------------------
 -- Table structure for `masterinfo`
@@ -25,7 +40,7 @@ CREATE TABLE `masterinfo` (
   `uID` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `uSaveMoney` int(11) NOT NULL DEFAULT '0',
   `uSaveMoney2` int(11) NOT NULL DEFAULT '0',
-  `uSaveItem` varchar(700) COLLATE utf8_unicode_ci DEFAULT '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+  `uSaveItem` varchar(700) COLLATE utf8_unicode_ci DEFAULT '',
   `aName01` varchar(12) COLLATE utf8_unicode_ci DEFAULT '',
   `aName02` varchar(12) COLLATE utf8_unicode_ci DEFAULT '',
   `aName03` varchar(12) COLLATE utf8_unicode_ci DEFAULT '',
@@ -54,4 +69,5 @@ CREATE TABLE `memberinfo` (
 -- ----------------------------
 -- Records of memberinfo
 -- ----------------------------
-INSERT INTO `memberinfo` VALUES ('test', '123', '0000', '0', '100', '0', '27700');
+INSERT INTO `memberinfo` VALUES ('test1', '1234', '0000', '0', '0', '0', '0');
+INSERT INTO `memberinfo` VALUES ('test2', '5678', '0000', '0', '0', '0', '0');
