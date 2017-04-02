@@ -1,56 +1,57 @@
 var net = require('net');
 var config = require('./config.js');
-var Worker = require('./server/s_worker.js');
-var Transfer = require('./server/s_transfer.js');
-var User = require('./server/s_user.js');
-var Mysql = require('./server/s_mysql.js');
+var worker = require('./server/s_worker');
+var transfer = require('./server/s_transfer');
+var user = require('./server/s_user');
+var mysql = require('./server/s_mysql');
 
-var server = net.createServer();
-server.listen(11091, config.LOGIN_IP);
-console.log('server listening to %j', config.LOGIN_IP);
-var worker = new Worker();
+
 if(worker.INIT() == false)
 {
 	console.log("Error::Worker Init()");
+	process.exit(1);
 	return;
 }
 console.log("Worker Init()");
 
-var transfer = new Transfer();
 if(transfer.INIT() == false)
 {
 	console.log("Error::Transfer Init()");
+	process.exit(1);
 	return;
 }
 console.log("Transfer Init()");
 
-var user = new User();
+
 if(user.INIT() == false)
 {
 	console.log("Error::User Init()");
+	process.exit(1);
 	return;
 }
 console.log("User Init()");
 
-var mysql = new Mysql();
-if(mysql.INIT() == false)
+if(mysql.INIT(config.MY_HOST, config.MY_USER, config.MY_PASS, config.MY_DB) == false)
 {
 	console.log("Error::Mysql Init()");
+	process.exit(1);
 	return;
 }
 console.log("Mysql Init()");
 
+
+var server = net.createServer();
+server.listen(11091, config.LOGIN_IP);
 server.on('connection', handleConnection);
-
-
+console.log('server listening to %j', config.LOGIN_IP);
 function handleConnection(socket)
 {
 	//var remoteAddress = socket.remoteAddress + ':' + socket.remotePort;
 	var tID = user.GetConnectPlayer();
 	if( tID >= user.maxUser )
 	{
-		console.log('max user : close socket id', socket.id);
-		socket.onclose();
+		console.log('max user', tID);
+		socket.destroy();
 		return;
 	}
 	user.userIP[tID] = socket.remoteAddress;
@@ -100,6 +101,6 @@ function handleConnection(socket)
 	socket.on('error', mainQuit);
 	function mainQuit()
 	{
-		user.Quit(socket, tID);
+		user.Quit(tID);
 	}
 }
