@@ -1,5 +1,5 @@
 # TS2.5
-===
+
 # Set up
 1.download Node Js
 
@@ -17,9 +17,9 @@
 
 8.copy TwelveSky2.exe in client folder to TS25ELW
 
-===
+
 # Progress
-===
+
 
 Login Server 10%
 - Login Account 30%
@@ -31,4 +31,3 @@ Login Server 10%
 
 Game Server 0%
 
-===
