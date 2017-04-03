@@ -1,5 +1,5 @@
-var server = require('./server/s_server');
-server.INIT( function( callback ) 
+var mSERVER = require('./server/s_server');
+mSERVER.INIT( function( callback ) 
 {
 	if(callback == false)
 	{
