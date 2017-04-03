@@ -1,6 +1,5 @@
 var struct = require('../struct');
 var config = require('../config');
-var socket = require('net');
 var MAX_RECV_BUFFER_SIZE = 10000;
 var MAX_SEND_BUFFER_SIZE = 10000;
 this.INIT = function( callback )
@@ -24,24 +23,18 @@ this.INIT = function( callback )
 			'uTotalRecvSize' : 0,
 			'uTotalSendSize' : 0,
 			'uSocket' : 0,
-			'uAvatar' : {
-				'0' : [struct.AVATAR_INFO],
-				'1' : [struct.AVATAR_INFO],
-				'2' : [struct.AVATAR_INFO]
+			'uAvatarInfo' : {
+				'0' : [],
+				'1' : [],
+				'2' : []
 			},
 		};
 		
-		this.mUSER[index01].uBUFFER_FOR_RECV = Buffer.alloc( MAX_RECV_BUFFER_SIZE );
-		this.mUSER[index01].uBUFFER_FOR_SEND = Buffer.alloc( MAX_SEND_BUFFER_SIZE );
-		this.mUSER[index01].uAvatar[0] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO );
-		this.mUSER[index01].uAvatar[1] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO );
-		this.mUSER[index01].uAvatar[2] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO );
-				
-		this.mUSER[index01].uBUFFER_FOR_RECV.fill( 0 );
-		this.mUSER[index01].uBUFFER_FOR_SEND.fill( 0 );
-		this.mUSER[index01].uAvatar[0].fill( 0 );
-		this.mUSER[index01].uAvatar[1].fill( 0 );
-		this.mUSER[index01].uAvatar[2].fill( 0 );
+		this.mUSER[index01].uBUFFER_FOR_RECV = Buffer.alloc( MAX_RECV_BUFFER_SIZE ).fill( 0 );
+		this.mUSER[index01].uBUFFER_FOR_SEND = Buffer.alloc( MAX_SEND_BUFFER_SIZE ).fill( 0 );
+		this.mUSER[index01].uAvatarInfo[0] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
+		this.mUSER[index01].uAvatarInfo[1] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
+		this.mUSER[index01].uAvatarInfo[2] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
 	}
 	return callback(true);
 }
@@ -85,9 +78,9 @@ this.Quit = function( tUserIndex )
 	this.mUSER[tUserIndex].uBUFFER_FOR_SEND.fill( 0 );
 	this.mUSER[tUserIndex].uTotalRecvSize = 0;
 	this.mUSER[tUserIndex].uTotalSendSize = 0;
-	this.mUSER[tUserIndex].uAvatar[0].fill( 0 );
-	this.mUSER[tUserIndex].uAvatar[1].fill( 0 );
-	this.mUSER[tUserIndex].uAvatar[2].fill( 0 );
+	this.mUSER[tUserIndex].uAvatarInfo[0].fill( 0 );
+	this.mUSER[tUserIndex].uAvatarInfo[1].fill( 0 );
+	this.mUSER[tUserIndex].uAvatarInfo[2].fill( 0 );
 	if( ( this.mUSER[tUserIndex].uCheckValidState ) && ( this.mUSER[tUserIndex].uMoveZoneResult == 0 ) )
 	{
 		//save

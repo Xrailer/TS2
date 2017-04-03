@@ -84,7 +84,7 @@ this.Accept = function( socket )
 		return;
 	}
 	socket.setTimeout(0);
-    socket.setNoDelay(true);
+	socket.setNoDelay(true);
 	user.mUSER[tempUserIndex].uCheckConnectState = true;
 	user.mUSER[tempUserIndex].uCheckValidState = false;
 	//
@@ -98,10 +98,11 @@ this.Accept = function( socket )
 	
 	//socket.on('close', Close);
 	//socket.on('error', Close);
-	//function Close()
-	//{
-	//	user.Quit( tempUserIndex );
-	//}
+	socket.on('end', Close);
+	function Close()
+	{
+		user.Quit( tempUserIndex );
+	}
 	
 	socket.on('data', Write);
 	function Write( data )

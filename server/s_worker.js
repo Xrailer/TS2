@@ -257,42 +257,46 @@ this.W_CREATE_AVATAR_SEND = function( tUserIndex )
 {
 	if ( !user.mUSER[tUserIndex].uCheckValidState )
 	{
-		console.log("0");
 		user.Quit( tUserIndex );
 		return;
 	}
 	if ( user.mUSER[tUserIndex].uSecondLoginSort != 0 )
 	{
-		console.log("1");
 		user.Quit( tUserIndex );
 		return;
 	}
 	if ( user.mUSER[tUserIndex].uMoveZoneResult == 1 )
 	{
-		console.log("2");
 		user.Quit( tUserIndex );
 		return;
 	}
 	user.mUSER[tUserIndex].mUsedTime = mGAME.GetTickCount();
 	
 	var tAvatarPost = new Buffer( 4 ).fill( 0 );
-	var tAvatarInfo = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
+	var AVATAR_INFO = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
 	var tPacket = Buffer( user.mUSER[tUserIndex].uBUFFER_FOR_RECV )
 	tPacket.copy( tPacket, 0 , 9, tPacket.length );
 	tPacket.copy( tAvatarPost, 0, 0, 4 );
-	tPacket.copy( tAvatarInfo, 0, 4, config.SIZE_OF_AVATAR_INFO );
-	struct.AVATAR_INFO1 = tAvatarInfo;
+	tPacket.copy( AVATAR_INFO, 0, 4, config.SIZE_OF_AVATAR_INFO );
+
+	var tAvatarInfo = struct._.unpackSync( 'AVATAR_INFO', AVATAR_INFO );
+	//tAvatarInfo.copy( tAvatarInfo, 0, 0, config.SIZE_OF_AVATAR_INFO );
+	console.log("aName", tAvatarInfo.aName);
+	//console.log("aName", tAvatarInfoss.aVisibleState);
+	/*console.log("aName", struct.AVATAR_INFO1[4]);
+	console.log("aName", struct.AVATAR_INFO1[8]);
+	console.log("aName", struct.AVATAR_INFO1[12]);
+	console.log("aName", struct.AVATAR_INFO1[16]);
+	console.log("aName", struct.AVATAR_INFO1[20]);*/
+	
 	tAvatarPost = tAvatarPost.readInt32LE();
 	console.log("tAvatarPost",tAvatarPost);
-	console.log("aName", struct.AVATAR_INFO1.aName);
-	
-	if( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) )//|| ( user.mUSER[tUserIndex].mAvatarInfo[tAvatarPost].aName != '' ) )
+	if( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) )//|| ( user.mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName != '' ) )
 	{
-		console.log("3");
 		user.Quit( tUserIndex );
 		return;
 	}
-	mTRANSFER.B_CREATE_AVATAR_RECV( 2 );//&tAvatarInfo);
+	mTRANSFER.B_CREATE_AVATAR_RECV( 0, AVATAR_INFO );
 	user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 }
 module.exports = this;
