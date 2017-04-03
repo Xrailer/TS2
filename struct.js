@@ -19,3 +19,23 @@ var struct = restruct.
 	int32lu('aGeneralExperience1').
 	int32lu('aGeneralExperience2');
 var AVATAR_INFO = struct;
+
+
+var Struct = require('struct');
+var AVATAR_INFO1 = Struct().
+	word32Sle('aVisibleState').
+	word32Sle('aSpecialState').
+	word32Sle('aPlayTime1').
+	word32Sle('aPlayTime2').
+	word32Sle('aKillOtherTribe').
+	chars('aName', config.MAX_AVATAR_NAME_LENGTH).
+	chars('aBuff0', 3).
+	word32Sle('aTribe').
+	word32Sle('aPreviousTribe').
+	word32Sle('aGender').
+	word32Sle('aHeadType').
+	word32Sle('aFaceType').
+	word32Sle('aLevel1').
+	word32Sle('aLevel2').
+	word32Sle('aGeneralExperience1').
+	word32Sle('aGeneralExperience2');
