@@ -1,34 +1,34 @@
 var net = require('net');
 var server = net.createServer();
 var config = require('../config.js');
-var worker = require('./s_worker');
-var transfer = require('./s_transfer');
+var mWORK = require('./s_worker');
+var mTRANSFER = require('./s_transfer');
 var user = require('./s_user');
-var mysql = require('./s_mysql');
-var game = require('./s_game');
+var mDB = require('./s_mysql');
+var mGAME = require('./s_game');
 
 this.INIT = function( callback )
 {
 	console.log('server working on %s', config.LOGIN_IP);
-	worker.INIT( function( callback ) 
+	mWORK.INIT( function( callback ) 
 	{
 		if(callback == false)
 		{
-			console.log("Error::Worker Init()");
+			console.log("Error::mWORK Init()");
 			process.exit(1);
 			return;
 		}
-		console.log("Worker Init()");
+		console.log("mWORK Init()");
 	});
-	transfer.INIT( function( callback ) 
+	mTRANSFER.INIT( function( callback ) 
 	{
 		if(callback == false)
 		{
-			console.log("Error::Transfer Init()");
+			console.log("Error::mTRANSFER Init()");
 			process.exit(1);
 			return;
 		}
-		console.log("Transfer Init()");
+		console.log("mTRANSFER Init()");
 	});
 	user.INIT( function( callback ) 
 	{
@@ -40,17 +40,17 @@ this.INIT = function( callback )
 		}
 		console.log("User Init()");
 	});
-	mysql.INIT( config.MY_HOST, config.MY_PORT, config.MY_USER, config.MY_PASS, config.MY_DB, function( callback )
+	mDB.INIT( config.MY_HOST, config.MY_PORT, config.MY_USER, config.MY_PASS, config.MY_DB, function( callback )
 	{
 		if(callback == false)
 		{
-			console.log("Error::Mysql Init()");
+			console.log("Error::mDB Init()");
 			process.exit(1);
 			return;
 		}
-		console.log("Mysql Init()");
+		console.log("mDB Init()");
 	});
-	game.INIT( function( callback ) 
+	mGAME.INIT( function( callback ) 
 	{
 		if(callback == false)
 		{
@@ -66,86 +66,146 @@ this.INIT = function( callback )
 }
 this.Accept = function( socket )
 {
-	var tID = user.GetConnectPlayer();
-	if( tID >= config.MAX_USER_FOR_LOGIN )
+	var tProtocol;
+	var wf;
+	var tRecvSizeFromUser;
+	var tempUserIndex;
+	
+	for( tempUserIndex = 0; tempUserIndex < config.MAX_USER_FOR_LOGIN; tempUserIndex++ )
 	{
-		console.log('max user', tID);
+		if( user.mUSER[tempUserIndex].uCheckConnectState === false )
+		{
+			break;
+		}
+	}
+	if( tempUserIndex >= config.MAX_USER_FOR_LOGIN )
+	{
 		socket.destroy();
 		return;
 	}
+	socket.setTimeout(0);
+    socket.setNoDelay(true);
+	user.mUSER[tempUserIndex].uCheckConnectState = true;
+	user.mUSER[tempUserIndex].uCheckValidState = false;
 	//
-	user.mUSER[tID].uIP = socket.remoteAddress;
-	console.log('new client connection from %s , tID:%d', user.mUSER[tID].uIP, tID);
-	Buffer(user.mUSER[tID].uAvatar[0]).fill(0);
-	Buffer(user.mUSER[tID].uAvatar[1]).fill(0);
-	Buffer(user.mUSER[tID].uAvatar[2]).fill(0);	
-	transfer.B_CONNECT_OK( 0, game.mMaxPlayerNum, game.mGagePlayerNum, (game.mPresentPlayerNum + game.mAddPlayerNum) );
-	user.Send( socket, tID, true, transfer.packet, transfer.packets );
-	socket.on('data', Write);	
-	socket.on('close', Close);
-	socket.on('error', Close);
-	function Close()
-	{
-		user.Quit( tID );
-	}
+	console.log('new client connection from %s , tUI:%d', socket.remoteAddress, tempUserIndex);
+	user.mUSER[tempUserIndex].uIP = socket.remoteAddress;
+	user.mUSER[tempUserIndex].uSocket = socket;
+	user.mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
+		
+	mTRANSFER.B_CONNECT_OK( 0, mGAME.mMaxPlayerNum, mGAME.mGagePlayerNum, ( mGAME.mPresentPlayerNum + mGAME.mAddPlayerNum ) );
+	user.Send( tempUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 	
-	function Write(data)
+	//socket.on('close', Close);
+	//socket.on('error', Close);
+	//function Close()
+	//{
+	//	user.Quit( tempUserIndex );
+	//}
+	
+	socket.on('data', Write);
+	function Write( data )
 	{
-		if(data.length < 9)
+		console.log('recv packet size', data.length);
+		//console.log('recv packet data', data);
+		tRecvSizeFromUser = data.length;
+		if( tRecvSizeFromUser <= 0 )
 		{
-			//console.log('error packet size ', data.length);
-			//socket.destroy();
-			return;
-		}
-		var tProtocol = parseInt(data[8]);
-		//console.log(tProtocol);
-    	if( worker.W_FUNCTION(tProtocol) === undefined )
-    	{
-			console.log('Undefined = Packet Header: ', tProtocol, ',Length:', data.length);
+			//console.log('error packet size ', tRecvSizeFromUser);
 			socket.destroy();
 			return;
 		}
-		if(data.length < worker.W_SIZE(tProtocol))
+		data.copy( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV, user.mUSER[tempUserIndex].uTotalRecvSize, 0, tRecvSizeFromUser);
+		user.mUSER[tempUserIndex].uTotalRecvSize += tRecvSizeFromUser;	
+		if( user.mUSER[tempUserIndex].uTotalRecvSize < 9 )
 		{
-			//console.log('Error Packet Header: ', tProtocol, ',Worker Length:', worker.W_FUNCTION(tProtocol)[1]);
+			return;
+		}
+		tProtocol = parseInt( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV[8] );
+		if( mWORK.W_FUNCTION( tProtocol ) === undefined )
+		{
+			console.log('Undefined = Packet Header: ', tProtocol, ',Length:', user.mUSER[tempUserIndex].uBUFFER_FOR_RECV);
+			user.mUSER[tempUserIndex].uSocket.destroy();
+			return;
+		}
+		if( user.mUSER[tempUserIndex].uTotalRecvSize < mWORK.W_SIZE( tProtocol ) )
+		{
+			//console.log('Error Packet Header: ', tProtocol, ',mWORK Length:', mWORK.W_FUNCTION(tProtocol)[1]);
 			//socket.destroy();
 			return;
 		}
-		var datas = [];
-		for(var i = 9; i < data.length; i++)
+		wf = mWORK.W_FUNCTION( tProtocol );
+		if ( wf in mWORK && typeof mWORK[wf] === "function" )
 		{
-			datas[i-9] = data[i];
-		}
-		//console.log(datas.length);
-		//console.log(datas);
-		var sf = worker.W_FUNCTION(tProtocol);
-		if (sf in worker && typeof worker[sf] === "function")
-		{
-			if( user.mUSER[tID].uCheckConnectState )
+			if( user.mUSER[tempUserIndex].uTotalRecvSize >= mWORK.W_SIZE( tProtocol ) )
 			{
-				worker[sf]( socket, tID, datas );
+				mWORK[wf]( tempUserIndex );
+				if( user.mUSER[tempUserIndex].uCheckConnectState )
+				{
+					user.mUSER[tempUserIndex].uBUFFER_FOR_RECV.copy( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV, 0, mWORK.W_SIZE( tProtocol ), user.mUSER[tempUserIndex].uTotalRecvSize);
+					user.mUSER[tempUserIndex].uTotalRecvSize -= mWORK.W_SIZE( tProtocol );
+				}
 			}
-		}
-		//console.log('recv packet size', data.length);
-		//console.log('recv packet data', data);
+		}		
 	}
 }
-//timer
-setInterval(function(){
-	game.mTickCount = game.GetTickCount();
-	//console.log("mTickCount", game.mTickCount);
-	/*for( var index01 = 0 ; index01 < user.maxUser ; index01++ )
+//timer1 worker
+setInterval(function()
+{
+	var tProtocol;
+	var wf;
+	var tRecvSizeFromUser;
+	var tempUserIndex;
+	/*for( tempUserIndex = 0 ; tempUserIndex < config.MAX_USER_FOR_LOGIN ; tempUserIndex++ )
 	{
-		if( !user.mCheckConnectState[index01] )
+		if( user.mUSER[tempUserIndex].uTotalRecvSize < 9 )
 		{
 			continue;
 		}
-		if( ( game.mTickCount - user.uUsedTime[index01] ) >= 60 )
+		tProtocol = parseInt( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV[8] );
+		if( mWORK.W_FUNCTION( tProtocol ) === undefined )
+		{
+			console.log('Undefined = Packet Header: ', tProtocol, ',Length:', user.mUSER[tempUserIndex].uBUFFER_FOR_RECV[8].length);
+			user.mUSER[tempUserIndex].uSocket.destroy();
+			continue;
+		}
+		if( user.mUSER[tempUserIndex].uTotalRecvSize < mWORK.W_SIZE( tProtocol ) )
+		{
+			//console.log('Error Packet Header: ', tProtocol, ',mWORK Length:', mWORK.W_FUNCTION(tProtocol)[1]);
+			//socket.destroy();
+			continue;
+		}
+		wf = mWORK.W_FUNCTION( tProtocol );
+		if ( wf in mWORK && typeof mWORK[wf] === "function" )
+		{
+			if( user.mUSER[tempUserIndex].uTotalRecvSize >= mWORK.W_SIZE( tProtocol ) )
+			{
+				mWORK[wf]( tempUserIndex );
+				if( user.mUSER[tempUserIndex].uCheckConnectState )
+				{
+					user.mUSER[tempUserIndex].uTotalRecvSize -= mWORK.W_SIZE( tProtocol );
+				}
+			}
+		}
+	}*/
+}, 1);
+//timer2
+setInterval(function()
+{	
+	mGAME.mTickCount = mGAME.GetTickCount();
+	//console.log("mTickCount", mGAME.mTickCount);
+	/*for( var index01 = 0 ; index01 < config.MAX_USER_FOR_LOGIN ; index01++ )
+	{
+		if( !user.mUSER[index01].uCheckConnectState )
+		{
+			continue;
+		}
+		if( ( mGAME.mTickCount - user.uUsedTime[index01] ) >= 60 )
 		{
 			user.Quit(index01);
 			continue;
 		}
-		if( !user.mCheckValidState[index01] )
+		if( !user.mUSER[index01].uCheckValidState )
 		{
 			continue;
 		}

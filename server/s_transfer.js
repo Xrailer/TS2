@@ -62,6 +62,16 @@ this.B_LOGIN_MOUSE_PASSWORD_RECV = function( tResult )
 	//console.log(this.packet);
 	return this.packet;	
 }
+this.B_CREATE_AVATAR_RECV = function( tResult )
+{
+	this.packets = this.config.S_CREATE_AVATAR_RECV;
+	this.packet = new Buffer(this.packets);
+	this.packet.fill(0);
+	this.packet.writeInt8( this.config.P_CREATE_AVATAR_RECV );
+	this.packet.writeInt32LE( tResult, 1 );
+	console.log(this.packet);
+	return this.packet;	
+}
 this.B_RCMD_WORLD_SEND = function()
 {
 	this.packets = this.config.S_RECOMMAND_WORLD_SEND;

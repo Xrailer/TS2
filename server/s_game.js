@@ -1,4 +1,4 @@
-var mysql = require('./s_mysql');
+var mDB = require('./s_mysql');
 this.INIT = function( callback )
 {
 	this.mTickCount = 0;
@@ -8,11 +8,11 @@ this.INIT = function( callback )
 	this.mPresentPlayerNum = 0;
 	this.tUnicode;
 	
-	mysql.DB_PROCESS_01( function( callback ) 
+	mDB.DB_PROCESS_01( function( callback ) 
 	{
 		if(callback == false)
 		{
-			console.log("Error::Mysql DB_PROCESS_01()");
+			console.log("Error::mDB.DB_PROCESS_01()");
 			process.exit(1);
 			return;
 		}

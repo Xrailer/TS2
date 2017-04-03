@@ -1,6 +1,6 @@
 var mysql = require('mysql');
 var config = require('../config');
-var game = require('./s_game');
+var mGAME = require('./s_game');
 var connection;
 this.INIT = function( host, port, user, pass, database, callback)
 {
@@ -41,9 +41,9 @@ this.DB_PROCESS_01 = function( callback )
 			console.log("Query Login ERROR : ", err);
 			return callback(false);
 		}
-		game.mMaxPlayerNum = result[0].mMaxUserNum;
-		game.mAddPlayerNum = result[0].mAddPlayerNum;
-		game.mGagePlayerNum = result[0].mGageUserNum;
+		mGAME.mMaxPlayerNum = result[0].mMaxUserNum;
+		mGAME.mAddPlayerNum = result[0].mAddPlayerNum;
+		mGAME.mGagePlayerNum = result[0].mGageUserNum;
 	});
 	return callback(true);
 }
@@ -66,9 +66,9 @@ this.DB_PROCESS_02 = function(tUserIndex, tID, tPassword, tIP, callback)
 			console.log("Wrong Account");
 			return callback(6);
 		}
-		if (result[0].uPassword != game.BufToStr(tPassword))
+		if (result[0].uPassword != mGAME.BufToStr(tPassword))
 		{
-			console.log("Wrong Password ", game.BufToStr(tPassword),": Real Password is : ", result[0].uPassword);
+			console.log("Wrong Password ", mGAME.BufToStr(tPassword),": Real Password is : ", result[0].uPassword);
 			return callback(7);
 		}
 		console.log("The account and password are correct");
