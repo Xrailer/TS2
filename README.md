@@ -25,10 +25,10 @@ Login Server 10%
 - Login Account 30%
 - Create 2nd Password 100%
 - Change 2nd Password 0%;
-- Login 2nd Password 100%
-- Create Character 5%
-- Load Character 5%
-- Delete Character 0%
+- Login 2nd Password 80%
+- Create Character 20%
+- Load Character 20%
+- Delete Character 50%
 - Enter World 0%
 
 Game Server 0%
