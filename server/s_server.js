@@ -36,11 +36,11 @@ this.INIT = function( callback )
 	{
 		if(callback == false)
 		{
-			console.log("Error::User Init()");
+			console.log("Error::mUSER Init()");
 			process.exit(1);
 			return;
 		}
-		console.log("User Init()");
+		console.log("mUSER Init()");
 	});
 	mDB.INIT( config.MY_HOST, config.MY_PORT, config.MY_USER, config.MY_PASS, config.MY_DB, function( callback )
 	{
@@ -56,11 +56,11 @@ this.INIT = function( callback )
 	{
 		if(callback == false)
 		{
-			console.log("Error::Game Init()");
+			console.log("Error::mGAME Init()");
 			process.exit(1);
 			return;
 		}
-		console.log("Game Init()");
+		console.log("mGAME Init()");
 	});
 	server.listen(config.LOGIN_PO, config.LOGIN_IP);
 	server.on('connection', this.Accept);
@@ -104,10 +104,10 @@ this.Accept = function( socket )
 	user.mUSER[tempUserIndex].uAvatarInfo[2] = struct.unpack( user.mUSER[tempUserIndex].uAvatarInfo[2] );
 	
 	mTRANSFER.B_CONNECT_OK( 0, mGAME.mMaxPlayerNum, mGAME.mGagePlayerNum, ( mGAME.mPresentPlayerNum + mGAME.mAddPlayerNum ) );
-	user.Send( tempUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
+	user.Send( tempUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
 	
 	//socket.on('close', Close);
-	//socket.on('error', Close);
+	socket.on('error', function(){});
 	socket.on('end', Close);
 	function Close()
 	{
