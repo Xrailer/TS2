@@ -203,10 +203,10 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 							user.mUSER[tUserIndex].uAvatarInfo[0].aLevel2 = returnData.aLevel2;
 							user.mUSER[tUserIndex].uAvatarInfo[0].aGeneralExperience1 = returnData.aGeneralExperience1
 							user.mUSER[tUserIndex].uAvatarInfo[0].aGeneralExperience1 = returnData.aGeneralExperience2;
-							user.mUSER[tUserIndex].uAvatarInfo[0].aVit = returnData.aVitality;
-							user.mUSER[tUserIndex].uAvatarInfo[0].aStr = returnData.aStrength;
-							user.mUSER[tUserIndex].uAvatarInfo[0].aInt = returnData.aKi;
-							user.mUSER[tUserIndex].uAvatarInfo[0].aDex = returnData.aWisdom;
+							user.mUSER[tUserIndex].uAvatarInfo[0].aVit = returnData.aVit;
+							user.mUSER[tUserIndex].uAvatarInfo[0].aStr = returnData.aStr;
+							user.mUSER[tUserIndex].uAvatarInfo[0].aInt = returnData.aInt;
+							user.mUSER[tUserIndex].uAvatarInfo[0].aDex = returnData.aDex;
 							console.log( user.mUSER[tUserIndex].uAvatarInfo[0].aName );
 							//user.mUSER[tUserIndex].uAvatarInfo[0] = Buffer( struct.pack( user.mUSER[tUserIndex].uAvatarInfo[0] ) );
 							//user.mUSER[tUserIndex].uAvatarInfo[0].copy( user.mUSER[tUserIndex].uAvatarInfo[0], 0, 0, this.SIZE_OF_AVATAR_INFO );
