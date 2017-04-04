@@ -78,7 +78,7 @@ this.W_LOGIN_SEND = function( tUserIndex )
 		user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 		for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 		{
-			mTRANSFER.B_USER_AVATAR_INFO();	
+			mTRANSFER.B_USER_AVATAR_INFO( user.mUSER[tUserIndex].uAvatarInfo[index01] );	
 			user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 		}
 		mTRANSFER.B_RCMD_WORLD_SEND();
@@ -90,14 +90,14 @@ this.W_LOGIN_SEND = function( tUserIndex )
 		user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 		for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 		{
-			mTRANSFER.B_USER_AVATAR_INFO();	
+			mTRANSFER.B_USER_AVATAR_INFO( user.mUSER[tUserIndex].uAvatarInfo[index01] );	
 			user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 		}
 		mTRANSFER.B_RCMD_WORLD_SEND();
 		user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 	}
 	
-	mDB.DB_PROCESS_02( tUserIndex, mGAME.BufToStr(tID), mGAME.BufToStr(tPassword), user.mUSER[tUserIndex].uIP, function( tResult, uID, uUserSort, uMousePassword )
+	mDB.DB_PROCESS_02( tUserIndex, mGAME.BufToStr(tID), mGAME.BufToStr(tPassword), user.mUSER[tUserIndex].uIP, function( tResult, uID, uUserSort, uMousePassword, uAvatarInfo1, uAvatarInfo2, uAvatarInfo3 )
 	{
 		if(tResult != 0)
 		{
@@ -105,7 +105,7 @@ this.W_LOGIN_SEND = function( tUserIndex )
 			user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 			for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 			{
-				mTRANSFER.B_USER_AVATAR_INFO();	
+				mTRANSFER.B_USER_AVATAR_INFO( user.mUSER[tUserIndex].uAvatarInfo[index01]  );
 				user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 			}
 			mTRANSFER.B_RCMD_WORLD_SEND();
@@ -113,9 +113,9 @@ this.W_LOGIN_SEND = function( tUserIndex )
 			return;
 		}
 		user.mUSER[tUserIndex].uCheckValidState = true;
-		user.mUSER[tUserIndex].uID = uID;
-		user.mUSER[tUserIndex].uUserSort = uUserSort;
-		user.mUSER[tUserIndex].uMousePassword = uMousePassword;
+		//user.mUSER[tUserIndex].uID = uID;
+		//user.mUSER[tUserIndex].uUserSort = uUserSort;
+		//user.mUSER[tUserIndex].uMousePassword = uMousePassword;
 		user.mUSER[tUserIndex].uSecondLoginSort = 1;
 		user.mUSER[tUserIndex].uSecondLoginTryNum = 0;
 		user.mUSER[tUserIndex].uMoveZoneResult = 0;
@@ -129,8 +129,9 @@ this.W_LOGIN_SEND = function( tUserIndex )
 		user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 		for( index01 = 0 ; index01 < config.MAX_USER_AVATAR_NUM ; index01++ )
 		{
-			mTRANSFER.B_USER_AVATAR_INFO();	
+			mTRANSFER.B_USER_AVATAR_INFO( user.mUSER[tUserIndex].uAvatarInfo[index01] );
 			user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
+			console.log( user.mUSER[tUserIndex].uAvatarInfo[index01] );
 		}
 		mTRANSFER.B_RCMD_WORLD_SEND();
 		user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
@@ -180,7 +181,7 @@ this.W_CREATE_MOUSE_PASSWORD_SEND = function( tUserIndex )
 	
 	mDB.DB_PROCESS_03( mGAME.BufToStr(user.uID[tUserIndex]), mGAME.BufToStr(tMousePassword), function( tResult )
 	{
-		if(tResult != 0)
+		if( !tResult )
 		{
 			mTRANSFER.B_CREATE_MOUSE_PASSWORD_RECV( 1, "0000" );
 			user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
@@ -248,7 +249,7 @@ this.W_LOGIN_MOUSE_PASSWORD_SEND = function ( tUserIndex )
 		}
 		return;
 	}
-	//coneolse.log("success to login 2nd password");
+	//console.log("success to login 2nd password");
 	user.mUSER[tUserIndex].uSecondLoginSort = 0;
 	mTRANSFER.B_LOGIN_MOUSE_PASSWORD_RECV( 0 );
 	user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
@@ -279,24 +280,27 @@ this.W_CREATE_AVATAR_SEND = function( tUserIndex )
 	tPacket.copy( tAvatarPost, 0, 0, 4 );
 	tPacket.copy( AVATAR_INFO, 0, 4, config.SIZE_OF_AVATAR_INFO );
 
-	var tAvatarInfo = struct._.unpackSync( 'AVATAR_INFO', AVATAR_INFO );
-	//tAvatarInfo.copy( tAvatarInfo, 0, 0, config.SIZE_OF_AVATAR_INFO );
+	var tAvatarInfo = struct.unpack( AVATAR_INFO );
 	console.log("aName", tAvatarInfo.aName);
-	//console.log("aName", tAvatarInfoss.aVisibleState);
-	/*console.log("aName", struct.AVATAR_INFO1[4]);
-	console.log("aName", struct.AVATAR_INFO1[8]);
-	console.log("aName", struct.AVATAR_INFO1[12]);
-	console.log("aName", struct.AVATAR_INFO1[16]);
-	console.log("aName", struct.AVATAR_INFO1[20]);*/
+	console.log("aTribe", tAvatarInfo.aTribe);
+	console.log("aHeadType", tAvatarInfo.aFaceType);
+	console.log("aFaceType", tAvatarInfo.aFaceType);
+	
 	
 	tAvatarPost = tAvatarPost.readInt32LE();
 	console.log("tAvatarPost",tAvatarPost);
-	if( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) )//|| ( user.mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName != '' ) )
+
+	if( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) || ( user.mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName != '' )
+		|| ( tAvatarInfo.aName == '' ) || ( tAvatarInfo.aTribe < 0 ) || ( tAvatarInfo.aTribe > 2 )
+		|| ( tAvatarInfo.aHeadType < 0 ) || ( tAvatarInfo.aHeadType > 6 )
+		|| ( tAvatarInfo.aFaceType < 0 ) || ( tAvatarInfo.aFaceType > 2 )
+		)
 	{
 		user.Quit( tUserIndex );
 		return;
 	}
-	mTRANSFER.B_CREATE_AVATAR_RECV( 0, AVATAR_INFO );
+	user.mUSER[tUserIndex].uAvatarInfo[tAvatarPost] = tAvatarInfo;
+	mTRANSFER.B_CREATE_AVATAR_RECV( 0, tAvatarInfo );
 	user.Send( tUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 }
 module.exports = this;

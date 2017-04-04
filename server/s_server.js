@@ -1,11 +1,13 @@
 var net = require('net');
 var server = net.createServer();
 var config = require('../config.js');
+var struct = require('../struct');
 var mWORK = require('./s_worker');
 var mTRANSFER = require('./s_transfer');
 var user = require('./s_user');
 var mDB = require('./s_mysql');
 var mGAME = require('./s_game');
+
 
 this.INIT = function( callback )
 {
@@ -92,7 +94,15 @@ this.Accept = function( socket )
 	user.mUSER[tempUserIndex].uIP = socket.remoteAddress;
 	user.mUSER[tempUserIndex].uSocket = socket;
 	user.mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
-		
+	
+	
+	user.mUSER[tempUserIndex].uAvatarInfo[0] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
+	user.mUSER[tempUserIndex].uAvatarInfo[1] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
+	user.mUSER[tempUserIndex].uAvatarInfo[2] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
+	user.mUSER[tempUserIndex].uAvatarInfo[0] = struct.unpack( user.mUSER[tempUserIndex].uAvatarInfo[0] );
+	user.mUSER[tempUserIndex].uAvatarInfo[1] = struct.unpack( user.mUSER[tempUserIndex].uAvatarInfo[1] );
+	user.mUSER[tempUserIndex].uAvatarInfo[2] = struct.unpack( user.mUSER[tempUserIndex].uAvatarInfo[2] );
+	
 	mTRANSFER.B_CONNECT_OK( 0, mGAME.mMaxPlayerNum, mGAME.mGagePlayerNum, ( mGAME.mPresentPlayerNum + mGAME.mAddPlayerNum ) );
 	user.Send( tempUserIndex, true, mTRANSFER.packet, mTRANSFER.packets );
 	
@@ -107,7 +117,7 @@ this.Accept = function( socket )
 	socket.on('data', Write);
 	function Write( data )
 	{
-		console.log('recv packet size', data.length);
+		//console.log('recv packet size', data.length);
 		//console.log('recv packet data', data);
 		tRecvSizeFromUser = data.length;
 		if( tRecvSizeFromUser <= 0 )
@@ -150,46 +160,6 @@ this.Accept = function( socket )
 		}		
 	}
 }
-//timer1 worker
-setInterval(function()
-{
-	var tProtocol;
-	var wf;
-	var tRecvSizeFromUser;
-	var tempUserIndex;
-	/*for( tempUserIndex = 0 ; tempUserIndex < config.MAX_USER_FOR_LOGIN ; tempUserIndex++ )
-	{
-		if( user.mUSER[tempUserIndex].uTotalRecvSize < 9 )
-		{
-			continue;
-		}
-		tProtocol = parseInt( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV[8] );
-		if( mWORK.W_FUNCTION( tProtocol ) === undefined )
-		{
-			console.log('Undefined = Packet Header: ', tProtocol, ',Length:', user.mUSER[tempUserIndex].uBUFFER_FOR_RECV[8].length);
-			user.mUSER[tempUserIndex].uSocket.destroy();
-			continue;
-		}
-		if( user.mUSER[tempUserIndex].uTotalRecvSize < mWORK.W_SIZE( tProtocol ) )
-		{
-			//console.log('Error Packet Header: ', tProtocol, ',mWORK Length:', mWORK.W_FUNCTION(tProtocol)[1]);
-			//socket.destroy();
-			continue;
-		}
-		wf = mWORK.W_FUNCTION( tProtocol );
-		if ( wf in mWORK && typeof mWORK[wf] === "function" )
-		{
-			if( user.mUSER[tempUserIndex].uTotalRecvSize >= mWORK.W_SIZE( tProtocol ) )
-			{
-				mWORK[wf]( tempUserIndex );
-				if( user.mUSER[tempUserIndex].uCheckConnectState )
-				{
-					user.mUSER[tempUserIndex].uTotalRecvSize -= mWORK.W_SIZE( tProtocol );
-				}
-			}
-		}
-	}*/
-}, 1);
 //timer2
 setInterval(function()
 {	

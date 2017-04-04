@@ -33,13 +33,14 @@ this.B_LOGIN_RECV = function( tResult, tID, tUserSort, tSecondLoginSort, tMouseP
 	//console.log(this.packet);
 	return this.packet;
 }
-this.B_USER_AVATAR_INFO = function()
+this.B_USER_AVATAR_INFO = function( tAvatarInfo )
 {
 	this.packets = config.S_USER_AVATAR_INFO;
 	this.packet = new Buffer(this.packets);
 	this.packet.fill(0);
-	this.packet.writeInt8( config.P_USER_AVATAR_INFO );
-	//console.log(this.packet);
+	this.packet.writeInt8( config.P_USER_AVATAR_INFO );	
+	this.packet.write( struct.pack( tAvatarInfo ).toString(), 1 );
+	console.log(this.packet);
 	return this.packet;
 }
 this.B_CREATE_MOUSE_PASSWORD_RECV = function( tResult, tMousePassword )
@@ -63,7 +64,6 @@ this.B_LOGIN_MOUSE_PASSWORD_RECV = function( tResult )
 	//console.log(this.packet);
 	return this.packet;	
 }
-var struct = require('../struct');
 this.B_CREATE_AVATAR_RECV = function( tResult, tAvatarInfo )
 {
 	this.packets = config.S_CREATE_AVATAR_RECV;
@@ -71,7 +71,7 @@ this.B_CREATE_AVATAR_RECV = function( tResult, tAvatarInfo )
 	this.packet.fill(0);
 	this.packet.writeInt8( config.P_CREATE_AVATAR_RECV );
 	this.packet.writeInt32LE( tResult, 1 );
-	this.packet.write( tAvatarInfo.toString() , 5);
+	this.packet.write( struct.pack( tAvatarInfo ).toString(), 5 );
 	//console.log(this.packet);
 	return this.packet;	
 }
