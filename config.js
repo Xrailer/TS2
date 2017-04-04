@@ -8,8 +8,8 @@ this.MAX_USER_FOR_LOGIN = 1000;
 this.MY_HOST = '127.0.0.1';
 this.MY_PORT = 3306;
 this.MY_USER = 'root';
-this.MY_PASS = '';
-this.MY_DB = 'game';
+this.MY_PASS = 'dos';
+this.MY_DB = '';
 this.MY_TB01 = 'DefineMaxUserNum';
 this.MY_TB02 = 'MemberInfo';
 this.MY_TB03 = 'AvatarInfo';
@@ -36,6 +36,8 @@ this.P_LOGIN_MOUSE_PASSWORD_SEND		=	15;
 this.S_LOGIN_MOUSE_PASSWORD_SEND		=	9 + this.MAX_MOUSE_PASSWORD_LENGTH;
 this.P_CREATE_AVATAR_SEND 				=	17;
 this.S_CREATE_AVATAR_SEND				=	13 + this.SIZE_OF_AVATAR_INFO;
+this.P_DELETE_AVATAR_SEND				=	18;
+this.S_DELETE_AVATAR_SEND				=	21;
 
 //LOGIN -> CLIENT;
 this.P_LOGIN_RECV						=	11;
@@ -50,8 +52,9 @@ this.P_LOGIN_MOUSE_PASSWORD_RECV		=	15;
 this.S_LOGIN_MOUSE_PASSWORD_RECV		=	5;
 this.P_CREATE_AVATAR_RECV				=	17
 this.S_CREATE_AVATAR_RECV				=	5 + this.SIZE_OF_AVATAR_INFO;
+this.P_DELETE_AVATAR_RECV				=	18;
+this.S_DELETE_AVATAR_RECV				=	5;
 this.P_RECOMMAND_WORLD_SEND				=	24;
 this.S_RECOMMAND_WORLD_SEND				=	13;
-
 
 module.exports = this;
