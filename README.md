@@ -27,6 +27,7 @@ Login Server 10%
 - Change 2nd Password 0%;
 - Login 2nd Password 100%
 - Create Character 5%
+- Load Character 5%
 - Delete Character 0%
 - Enter World 0%
 
