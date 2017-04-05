@@ -1,81 +1,88 @@
-var struct = require('../struct');
-var config = require('../config');
-this.INIT = function( callback )
+global.mTRANSFER = [];
+global.TransferInit = function( callback )
 {
-	this.mOriginal = new Buffer.alloc(10000).fill( 0 );
-	this.mOriginalSize = 0;
+	mTRANSFER.mOriginal 					= Buffer.alloc(10000).fill( 0 );
+	mTRANSFER.mOriginalSize 				= 0;
+	mTRANSFER.B_CONNECT_OK 					= B_CONNECT_OK;
+	mTRANSFER.B_LOGIN_RECV 					= B_LOGIN_RECV;
+	mTRANSFER.B_USER_AVATAR_INFO 			= B_USER_AVATAR_INFO;
+	mTRANSFER.B_CREATE_MOUSE_PASSWORD_RECV 	= B_CREATE_MOUSE_PASSWORD_RECV;
+	mTRANSFER.B_LOGIN_MOUSE_PASSWORD_RECV 	= B_LOGIN_MOUSE_PASSWORD_RECV;
+	mTRANSFER.B_CREATE_AVATAR_RECV 			= B_CREATE_AVATAR_RECV;
+	mTRANSFER.B_DELETE_AVATAR_RECV 			= B_DELETE_AVATAR_RECV;
+	mTRANSFER.B_RCMD_WORLD_SEND 			= B_RCMD_WORLD_SEND;
 	return callback( true );
 }
-this.B_CONNECT_OK = function( tRandomNumber, tMaxPlayerNum, tGagePlayerNum, tPresentPlayerNum )
+var B_CONNECT_OK = function( tRandomNumber, tMaxPlayerNum, tGagePlayerNum, tPresentPlayerNum )
 {
-	this.mOriginalSize = 17;
-	this.mOriginal = new Buffer( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8(0);
-	this.mOriginal.writeInt32LE( tRandomNumber, 1 );
-	this.mOriginal.writeInt32LE( tMaxPlayerNum, 5 );
-	this.mOriginal.writeInt32LE( tGagePlayerNum, 9 );
-	this.mOriginal.writeInt32LE( tPresentPlayerNum, 13 );
-	//console.log(this.mOriginal);
+	mTRANSFER.mOriginalSize = 17;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8(0);
+	mTRANSFER.mOriginal.writeInt32LE( tRandomNumber, 1 );
+	mTRANSFER.mOriginal.writeInt32LE( tMaxPlayerNum, 5 );
+	mTRANSFER.mOriginal.writeInt32LE( tGagePlayerNum, 9 );
+	mTRANSFER.mOriginal.writeInt32LE( tPresentPlayerNum, 13 );
+	//console.log(mTRANSFER.mOriginal);
 }
-this.B_LOGIN_RECV = function( tResult, tID, tUserSort, tSecondLoginSort, tMousePassword )
+var B_LOGIN_RECV = function( tResult, tID, tUserSort, tSecondLoginSort, tMousePassword )
 {
-	this.mOriginalSize = config.S_LOGIN_RECV;
-	this.mOriginal = new Buffer( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8( config.P_LOGIN_RECV );
-	this.mOriginal.writeInt32LE( tResult, 1 );
-	this.mOriginal.write( tID.toString(), 5 );
-	this.mOriginal.writeInt32LE( tUserSort, ( 5 + config.MAX_USER_ID_LENGTH ) );
-	this.mOriginal.writeInt32LE( tSecondLoginSort, ( 5 + config.MAX_USER_ID_LENGTH + 16 ) );
-	this.mOriginal.write( tMousePassword.toString(), ( 5 + config.MAX_USER_ID_LENGTH + 20 ) );
-	//console.log(this.mOriginal);
+	mTRANSFER.mOriginalSize = S_LOGIN_RECV;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_LOGIN_RECV );
+	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
+	mTRANSFER.mOriginal.write( tID.toString(), 5 );
+	mTRANSFER.mOriginal.writeInt32LE( tUserSort, ( 5 + MAX_USER_ID_LENGTH ) );
+	mTRANSFER.mOriginal.writeInt32LE( tSecondLoginSort, ( 5 + MAX_USER_ID_LENGTH + 16 ) );
+	mTRANSFER.mOriginal.write( tMousePassword.toString(), ( 5 + MAX_USER_ID_LENGTH + 20 ) );
+	//console.log(mTRANSFER.mOriginal);
 }
-this.B_USER_AVATAR_INFO = function( tAvatarInfo )
+var B_USER_AVATAR_INFO = function( tAvatarInfo )
 {
-	this.mOriginalSize = config.S_USER_AVATAR_INFO;
-	this.mOriginal = new Buffer.alloc( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8( config.P_USER_AVATAR_INFO );
-	this.mOriginal.write( struct.pack( tAvatarInfo ).toString(), 1 );
-	//console.log(this.mOriginal);
+	mTRANSFER.mOriginalSize = S_USER_AVATAR_INFO;
+	mTRANSFER.mOriginal = new Buffer.alloc( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_USER_AVATAR_INFO );
+	mTRANSFER.mOriginal.write( pAvatar( 1, tAvatarInfo ).toString(), 1 );
+	//console.log(mTRANSFER.mOriginal);
 }
-this.B_CREATE_MOUSE_PASSWORD_RECV = function( tResult, tMousePassword )
+var B_CREATE_MOUSE_PASSWORD_RECV = function( tResult, tMousePassword )
 {
-	this.mOriginalSize = config.S_CREATE_MOUSE_PASSWORD_RECV;
-	this.mOriginal = new Buffer( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8( config.P_CREATE_MOUSE_PASSWORD_RECV );
-	this.mOriginal.writeInt32LE( tResult, 1 );
-	this.mOriginal.write( tMousePassword.toString(), 5 );
-	//console.log(this.mOriginal);	
+	mTRANSFER.mOriginalSize = S_CREATE_MOUSE_PASSWORD_RECV;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_CREATE_MOUSE_PASSWORD_RECV );
+	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
+	mTRANSFER.mOriginal.write( tMousePassword.toString(), 5 );
+	//console.log(mTRANSFER.mOriginal);	
 }
-this.B_LOGIN_MOUSE_PASSWORD_RECV = function( tResult )
+var B_LOGIN_MOUSE_PASSWORD_RECV = function( tResult )
 {
-	this.mOriginalSize = config.S_LOGIN_MOUSE_PASSWORD_RECV;
-	this.mOriginal = new Buffer( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8( config.P_LOGIN_MOUSE_PASSWORD_RECV );
-	this.mOriginal.writeInt32LE( tResult, 1 );
-	//console.log(this.mOriginal);	
+	mTRANSFER.mOriginalSize = S_LOGIN_MOUSE_PASSWORD_RECV;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_LOGIN_MOUSE_PASSWORD_RECV );
+	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
+	//console.log(mTRANSFER.mOriginal);	
 }
-this.B_CREATE_AVATAR_RECV = function( tResult, tAvatarInfo )
+var B_CREATE_AVATAR_RECV = function( tResult, tAvatarInfo )
 {
-	this.mOriginalSize = config.S_CREATE_AVATAR_RECV;
-	this.mOriginal = new Buffer( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8( config.P_CREATE_AVATAR_RECV );
-	this.mOriginal.writeInt32LE( tResult, 1 );
-	this.mOriginal.write( struct.pack( tAvatarInfo ).toString(), 5 );
-	//console.log(this.mOriginal);	
+	mTRANSFER.mOriginalSize = S_CREATE_AVATAR_RECV;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_CREATE_AVATAR_RECV );
+	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
+	mTRANSFER.mOriginal.write( pAvatar( 1, tAvatarInfo ).toString(), 5 );
+	//console.log(mTRANSFER.mOriginal);	
 }
-this.B_DELETE_AVATAR_RECV = function( tResult )
+var B_DELETE_AVATAR_RECV = function( tResult )
 {
-	this.mOriginalSize = config.S_DELETE_AVATAR_RECV;
-	this.mOriginal = new Buffer( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8( config.P_CREATE_AVATAR_RECV );
-	this.mOriginal.writeInt32LE( tResult, 1 );
-	//console.log(this.mOriginal);
+	mTRANSFER.mOriginalSize = S_DELETE_AVATAR_RECV;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_CREATE_AVATAR_RECV );
+	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
+	//console.log(mTRANSFER.mOriginal);
 }
-this.B_RCMD_WORLD_SEND = function()
+var B_RCMD_WORLD_SEND = function()
 {
-	this.mOriginalSize = config.S_RECOMMAND_WORLD_SEND;
-	this.mOriginal = new Buffer( this.mOriginalSize ).fill( 0 );
-	this.mOriginal.writeInt8( config.P_RECOMMAND_WORLD_SEND );
-	//console.log(this.mOriginal);
+	mTRANSFER.mOriginalSize = S_RECOMMAND_WORLD_SEND;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_RECOMMAND_WORLD_SEND );
+	//console.log(mTRANSFER.mOriginal);
 }
-module.exports = this;
+module.exports = global;

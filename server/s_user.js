@@ -1,13 +1,12 @@
-var config = require('../config');
 var MAX_RECV_BUFFER_SIZE = 10000;
 var MAX_SEND_BUFFER_SIZE = 10000;
-this.INIT = function( callback )
+global.mUSER = [];
+global.UserInit = function( callback )
 {
-	this.mUSER = [];
 	var index01;
-	for( index01 = 0; index01 < config.MAX_USER_FOR_LOGIN; index01++ )
+	for( index01 = 0; index01 < MAX_USER_FOR_LOGIN; index01++ )
 	{
-		this.mUSER[index01] = {
+		mUSER[index01] = {
 			'uID' : '',
 			'uIP' : '',
 			'uCheckConnectState' : false,
@@ -27,18 +26,22 @@ this.INIT = function( callback )
 				'1' : 0,
 				'2' : 0
 			}
-		};		
-		this.mUSER[index01].uBUFFER_FOR_RECV = Buffer.alloc( MAX_RECV_BUFFER_SIZE ).fill( 0 );
-		this.mUSER[index01].uBUFFER_FOR_SEND = Buffer.alloc( MAX_SEND_BUFFER_SIZE ).fill( 0 );
-		this.mUSER[index01].uAvatarInfo[0] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
-		this.mUSER[index01].uAvatarInfo[1] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
-		this.mUSER[index01].uAvatarInfo[2] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );		
+		};
+		mUSER[index01].uBUFFER_FOR_RECV = Buffer.alloc( MAX_RECV_BUFFER_SIZE ).fill( 0 );
+		mUSER[index01].uBUFFER_FOR_SEND = Buffer.alloc( MAX_SEND_BUFFER_SIZE ).fill( 0 );
+		mUSER[index01].uAvatarInfo[0] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+		mUSER[index01].uAvatarInfo[1] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+		mUSER[index01].uAvatarInfo[2] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+		mUSER[index01].Send = Send;
+		mUSER[index01].Quit = Quit;
 	}
 	return callback(true);
 }
-this.Send = function( tUserIndex, tCheckValidBuffer, tBuffer, tBufferSize )
+var Send = function( tUserIndex, tCheckValidBuffer, tBuffer, tBufferSize )
 {
-	if( !this.mUSER[tUserIndex].uCheckConnectState )
+	console.log(tBuffer);
+	console.log(tBufferSize);
+	if( !mUSER[tUserIndex].uCheckConnectState )
 	{
 		return;
 	}
@@ -49,41 +52,40 @@ this.Send = function( tUserIndex, tCheckValidBuffer, tBuffer, tBufferSize )
 	}
 	if( tCheckValidBuffer )
 	{
-		if( ( MAX_SEND_BUFFER_SIZE - this.mUSER[tUserIndex].uTotalSendSize ) < tBufferSize )
+		if( ( MAX_SEND_BUFFER_SIZE - mUSER[tUserIndex].uTotalSendSize ) < tBufferSize )
 		{
 			Quit( tUserIndex );
 			return;
 		}
-		tBuffer.copy( this.mUSER[tUserIndex].uBUFFER_FOR_SEND, this.mUSER[tUserIndex].uTotalSendSize, 0, tBufferSize );
-		this.mUSER[tUserIndex].uTotalSendSize += tBufferSize;
+		tBuffer.copy( mUSER[tUserIndex].uBUFFER_FOR_SEND, mUSER[tUserIndex].uTotalSendSize, 0, tBufferSize );
+		mUSER[tUserIndex].uTotalSendSize += tBufferSize;
 	}
-	while( this.mUSER[tUserIndex].uTotalSendSize > 0 )
+	while( mUSER[tUserIndex].uTotalSendSize > 0 )
 	{
-		this.mUSER[tUserIndex].uSocket.write( this.mUSER[tUserIndex].uBUFFER_FOR_SEND.slice( 0, this.mUSER[tUserIndex].uTotalSendSize ) );
-		this.mUSER[tUserIndex].uBUFFER_FOR_SEND.copy( this.mUSER[tUserIndex].uBUFFER_FOR_SEND, 0, 0, this.mUSER[tUserIndex].uTotalSendSize );
-		this.mUSER[tUserIndex].uTotalSendSize -= tBufferSize;
+		mUSER[tUserIndex].uSocket.write( mUSER[tUserIndex].uBUFFER_FOR_SEND.slice( 0, mUSER[tUserIndex].uTotalSendSize ) );
+		mUSER[tUserIndex].uBUFFER_FOR_SEND.copy( mUSER[tUserIndex].uBUFFER_FOR_SEND, 0, 0, mUSER[tUserIndex].uTotalSendSize );
+		mUSER[tUserIndex].uTotalSendSize -= tBufferSize;
 	}
 }
-this.Quit = function( tUserIndex )
+var Quit = function( tUserIndex )
 {
-	if( !this.mUSER[tUserIndex].uCheckConnectState )
+	if( !mUSER[tUserIndex].uCheckConnectState )
 	{
 		return;
 	}
-	this.mUSER[tUserIndex].uCheckConnectState = false;
-	this.mUSER[tUserIndex].uCheckValidState = false;
-	this.mUSER[tUserIndex].uTotalRecvSize = 0;
-	this.mUSER[tUserIndex].uTotalSendSize = 0;
-	this.mUSER[tUserIndex].uBUFFER_FOR_RECV.fill( 0 );
-	this.mUSER[tUserIndex].uBUFFER_FOR_SEND.fill( 0 );
+	mUSER[tUserIndex].uCheckConnectState = false;
+	mUSER[tUserIndex].uCheckValidState = false;
+	mUSER[tUserIndex].uTotalRecvSize = 0;
+	mUSER[tUserIndex].uTotalSendSize = 0;
+	mUSER[tUserIndex].uBUFFER_FOR_RECV.fill( 0 );
+	mUSER[tUserIndex].uBUFFER_FOR_SEND.fill( 0 );
 
-	if( ( this.mUSER[tUserIndex].uCheckValidState ) && ( this.mUSER[tUserIndex].uMoveZoneResult == 0 ) )
+	if( ( mUSER[tUserIndex].uCheckValidState ) && ( mUSER[tUserIndex].uMoveZoneResult == 0 ) )
 	{
 		//save
 	}
-	console.log('close connection from tUI:%d, uID:%s, uIP:%s', tUserIndex, this.mUSER[tUserIndex].uID, this.mUSER[tUserIndex].uIP);
-	this.mUSER[tUserIndex].uID = '';
-	this.mUSER[tUserIndex].uSocket.destroy();
-	delete (this.mUSER[tUserIndex].uSocket);
+	console.log('close connection from tUI:%d, uID:%s, uIP:%s', tUserIndex, mUSER[tUserIndex].uID, mUSER[tUserIndex].uIP);
+	mUSER[tUserIndex].uID = '';
+	mUSER[tUserIndex].uSocket.destroy();
 }
-module.exports = this;
+module.exports = global;

@@ -1,18 +1,18 @@
 var net = require('net');
 var server = net.createServer();
-var config = require('../config.js');
-var struct = require('../struct');
-var mWORK = require('./s_worker');
-var mTRANSFER = require('./s_transfer');
-var user = require('./s_user');
+var config = require('../config');
+var Struct = require('../struct');
+var Worker = require('./s_worker');
+var Transfer = require('./s_transfer');
+var User = require('./s_user');
+var Game = require('./s_game');
 var mDB = require('./s_mysql');
-var mGAME = require('./s_game');
 
 
 this.INIT = function( callback )
 {
-	console.log('server working on %s', config.LOGIN_IP);
-	mWORK.INIT( function( callback ) 
+	console.log('server working on %s', LOGIN_IP);
+	WorkInit( function( callback ) 
 	{
 		if(callback == false)
 		{
@@ -22,7 +22,7 @@ this.INIT = function( callback )
 		}
 		console.log("mWORK Init()");
 	});
-	mTRANSFER.INIT( function( callback ) 
+	TransferInit( function( callback ) 
 	{
 		if(callback == false)
 		{
@@ -32,7 +32,7 @@ this.INIT = function( callback )
 		}
 		console.log("mTRANSFER Init()");
 	});
-	user.INIT( function( callback ) 
+	UserInit( function( callback ) 
 	{
 		if(callback == false)
 		{
@@ -42,7 +42,7 @@ this.INIT = function( callback )
 		}
 		console.log("mUSER Init()");
 	});
-	mDB.INIT( config.MY_HOST, config.MY_PORT, config.MY_USER, config.MY_PASS, config.MY_DB, function( callback )
+	MysqlInit( MY_HOST, MY_PORT, MY_USER, MY_PASS, MY_DB, function( callback )
 	{
 		if(callback == false)
 		{
@@ -52,7 +52,7 @@ this.INIT = function( callback )
 		}
 		console.log("mDB Init()");
 	});
-	mGAME.INIT( function( callback ) 
+	GameInit( function( callback ) 
 	{
 		if(callback == false)
 		{
@@ -62,8 +62,8 @@ this.INIT = function( callback )
 		}
 		console.log("mGAME Init()");
 	});
-	server.listen(config.LOGIN_PO, config.LOGIN_IP);
-	server.on('connection', this.Accept);
+	server.listen(LOGIN_PO, LOGIN_IP);
+	server.on('connection', this.Accept);	
 	return callback(true);
 }
 this.Accept = function( socket )
@@ -73,45 +73,44 @@ this.Accept = function( socket )
 	var tRecvSizeFromUser;
 	var tempUserIndex;
 	
-	for( tempUserIndex = 0; tempUserIndex < config.MAX_USER_FOR_LOGIN; tempUserIndex++ )
+	for( tempUserIndex = 0; tempUserIndex < MAX_USER_FOR_LOGIN; tempUserIndex++ )
 	{
-		if( user.mUSER[tempUserIndex].uCheckConnectState === false )
+		if( mUSER[tempUserIndex].uCheckConnectState === false )
 		{
 			break;
 		}
 	}
-	if( tempUserIndex >= config.MAX_USER_FOR_LOGIN )
+	if( tempUserIndex >= MAX_USER_FOR_LOGIN )
 	{
 		socket.destroy();
 		return;
 	}
 	socket.setTimeout(0);
 	socket.setNoDelay(true);
-	user.mUSER[tempUserIndex].uCheckConnectState = true;
-	user.mUSER[tempUserIndex].uCheckValidState = false;
+	mUSER[tempUserIndex].uCheckConnectState = true;
+	mUSER[tempUserIndex].uCheckValidState = false;
 	//
 	console.log('new client connection from %s , tUI:%d', socket.remoteAddress, tempUserIndex);
-	user.mUSER[tempUserIndex].uIP = socket.remoteAddress;
-	user.mUSER[tempUserIndex].uSocket = socket;
-	user.mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
-	
-	
-	user.mUSER[tempUserIndex].uAvatarInfo[0] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
-	user.mUSER[tempUserIndex].uAvatarInfo[1] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
-	user.mUSER[tempUserIndex].uAvatarInfo[2] = Buffer.alloc( config.SIZE_OF_AVATAR_INFO ).fill( 0 );
-	user.mUSER[tempUserIndex].uAvatarInfo[0] = struct.unpack( user.mUSER[tempUserIndex].uAvatarInfo[0] );
-	user.mUSER[tempUserIndex].uAvatarInfo[1] = struct.unpack( user.mUSER[tempUserIndex].uAvatarInfo[1] );
-	user.mUSER[tempUserIndex].uAvatarInfo[2] = struct.unpack( user.mUSER[tempUserIndex].uAvatarInfo[2] );
+	mUSER[tempUserIndex].uIP = socket.remoteAddress;
+	mUSER[tempUserIndex].uSocket = socket;
+	mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
+		
+	mUSER[tempUserIndex].uAvatarInfo[0] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[1] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[2] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[0] = pAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[0] );
+	mUSER[tempUserIndex].uAvatarInfo[1] = pAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[1] );
+	mUSER[tempUserIndex].uAvatarInfo[2] = pAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[2] );
 	
 	mTRANSFER.B_CONNECT_OK( 0, mGAME.mMaxPlayerNum, mGAME.mGagePlayerNum, ( mGAME.mPresentPlayerNum + mGAME.mAddPlayerNum ) );
-	user.Send( tempUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+	mUSER[tempUserIndex].Send( tempUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
 	
 	//socket.on('close', Close);
 	socket.on('error', function(){});
 	socket.on('end', Close);
 	function Close()
 	{
-		user.Quit( tempUserIndex );
+		mUSER[tempUserIndex].Quit( tempUserIndex );
 	}
 	
 	socket.on('data', Write);
@@ -126,38 +125,38 @@ this.Accept = function( socket )
 			socket.destroy();
 			return;
 		}
-		data.copy( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV, user.mUSER[tempUserIndex].uTotalRecvSize, 0, tRecvSizeFromUser);
-		user.mUSER[tempUserIndex].uTotalRecvSize += tRecvSizeFromUser;	
-		if( user.mUSER[tempUserIndex].uTotalRecvSize < 9 )
+		data.copy( mUSER[tempUserIndex].uBUFFER_FOR_RECV, mUSER[tempUserIndex].uTotalRecvSize, 0, tRecvSizeFromUser);
+		mUSER[tempUserIndex].uTotalRecvSize += tRecvSizeFromUser;	
+		if( mUSER[tempUserIndex].uTotalRecvSize < 9 )
 		{
 			return;
 		}
-		tProtocol = parseInt( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV[8] );
-		if( mWORK.W_FUNCTION( tProtocol ) === undefined )
+		tProtocol = parseInt( mUSER[tempUserIndex].uBUFFER_FOR_RECV[8] );
+		if( mWORK[tProtocol].PROC == undefined )
 		{
-			console.log('Undefined = Packet Header: ', tProtocol, ',Length:', user.mUSER[tempUserIndex].uBUFFER_FOR_RECV);
-			user.mUSER[tempUserIndex].uSocket.destroy();
+			console.log('Undefined = Packet Header: ', tProtocol, ',Length:', mUSER[tempUserIndex].uBUFFER_FOR_RECV);
+			mUSER[tempUserIndex].uSocket.destroy();
 			return;
 		}
-		if( user.mUSER[tempUserIndex].uTotalRecvSize < mWORK.W_SIZE( tProtocol ) )
+		if( mUSER[tempUserIndex].uTotalRecvSize < mWORK[tProtocol].SIZE )
 		{
 			//console.log('Error Packet Header: ', tProtocol, ',mWORK Length:', mWORK.W_FUNCTION(tProtocol)[1]);
 			//socket.destroy();
 			return;
 		}
-		wf = mWORK.W_FUNCTION( tProtocol );
-		if ( wf in mWORK && typeof mWORK[wf] === "function" )
-		{
-			if( user.mUSER[tempUserIndex].uTotalRecvSize >= mWORK.W_SIZE( tProtocol ) )
+		//wf = mWORK.W_FUNCTION( tProtocol );
+		//if ( wf in mWORK && typeof mWORK[wf] === "function" )
+		//{
+			if( mUSER[tempUserIndex].uTotalRecvSize >= mWORK[tProtocol].SIZE )
 			{
-				mWORK[wf]( tempUserIndex );
-				if( user.mUSER[tempUserIndex].uCheckConnectState )
+				mWORK[tProtocol].PROC( tempUserIndex );
+				if( mUSER[tempUserIndex].uCheckConnectState )
 				{
-					user.mUSER[tempUserIndex].uBUFFER_FOR_RECV.copy( user.mUSER[tempUserIndex].uBUFFER_FOR_RECV, 0, mWORK.W_SIZE( tProtocol ), user.mUSER[tempUserIndex].uTotalRecvSize);
-					user.mUSER[tempUserIndex].uTotalRecvSize -= mWORK.W_SIZE( tProtocol );
+					mUSER[tempUserIndex].uBUFFER_FOR_RECV.copy( mUSER[tempUserIndex].uBUFFER_FOR_RECV, 0, mWORK[tProtocol].SIZE, mUSER[tempUserIndex].uTotalRecvSize);
+					mUSER[tempUserIndex].uTotalRecvSize -= mWORK[tProtocol].SIZE;
 				}
 			}
-		}		
+		//}		
 	}
 }
 //timer2
@@ -165,18 +164,18 @@ setInterval(function()
 {	
 	mGAME.mTickCount = mGAME.GetTickCount();
 	//console.log("mTickCount", mGAME.mTickCount);
-	/*for( var index01 = 0 ; index01 < config.MAX_USER_FOR_LOGIN ; index01++ )
+	/*for( var index01 = 0 ; index01 < MAX_USER_FOR_LOGIN ; index01++ )
 	{
-		if( !user.mUSER[index01].uCheckConnectState )
+		if( !mUSER[index01].uCheckConnectState )
 		{
 			continue;
 		}
-		if( ( mGAME.mTickCount - user.uUsedTime[index01] ) >= 60 )
+		if( ( mGAME.mTickCount - uUsedTime[index01] ) >= 60 )
 		{
-			user.Quit(index01);
+			Quit(index01);
 			continue;
 		}
-		if( !user.mUSER[index01].uCheckValidState )
+		if( !mUSER[index01].uCheckValidState )
 		{
 			continue;
 		}

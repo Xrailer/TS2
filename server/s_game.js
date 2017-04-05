@@ -1,13 +1,16 @@
-var mDB = require('./s_mysql');
-this.INIT = function( callback )
+global.mGAME = [];
+global.GameInit = function( callback )
 {
-	this.mTickCount = 0;
-	this.mMaxPlayerNum = 0;
-	this.mAddPlayerNum = 0;
-	this.mGagePlayerNum = 0;
-	this.mPresentPlayerNum = 0;
-	this.tUnicode;
-	
+	mGAME.mTickCount = 0;
+	mGAME.mMaxPlayerNum = 0;
+	mGAME.mAddPlayerNum = 0;
+	mGAME.mGagePlayerNum = 0;
+	mGAME.mPresentPlayerNum = 0;
+	mGAME.tUnicode;
+	mGAME.GetTickCount = GetTickCount;
+	mGAME.CheckNameString = CheckNameString;
+	mGAME.BufToStr = BufToStr;
+	mGAME.StrToBuf = StrToBuf;
 	mDB.DB_PROCESS_01( function( callback ) 
 	{
 		if(callback == false)
@@ -16,14 +19,14 @@ this.INIT = function( callback )
 			process.exit(1);
 			return;
 		}
-	});	
+	});
 	return callback(true);
 }
-this.GetTickCount = function()
+var GetTickCount = function()
 {
 	return process.hrtime()[0];
 }
-this.CheckNameString = function(string)
+var CheckNameString = function(string)
 {
 	for (var i = 0; i < string.length; i++) 
 	{
@@ -48,12 +51,12 @@ this.CheckNameString = function(string)
 	}
 	return true;
 }
-this.BufToStr = function(buf)
+var BufToStr = function(buf)
 {
 	return buf.toString('utf8').replace(/\0/g, '');
 }
-this.StrToBuf = function(string)
+var StrToBuf = function(string)
 {
 	return Buffer(string);
 }
-module.exports = this;
+module.exports = global;

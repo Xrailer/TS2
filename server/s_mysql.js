@@ -1,13 +1,9 @@
 var mysql = require('mysql');
-var config = require('../config');
-var mGAME = require('./s_game');
-var struct = require('../struct');
-var user = require('./s_user');
-
 var connection;
 var mQuery;
 var nQuery;
-this.INIT = function( host, port, user, pass, database, callback )
+global.mDB = [];
+global.MysqlInit = function( host, port, user, pass, database, callback )
 {
 	if( (host == undefined) || (port == undefined) || (user == undefined) || (pass == undefined) || (database == undefined) )
 	{
@@ -22,10 +18,10 @@ this.INIT = function( host, port, user, pass, database, callback )
 	});
 	/*var pool  = mysql.createPool({
 	  connectionLimit : 10,
-	   host     : config.MY_HOST,
-	  user     : config.MY_USER,
-	  password : config.MY_PASS,
-	  database : config.MY_DB
+	   host     : MY_HOST,
+	  user     : MY_USER,
+	  password : MY_PASS,
+	  database : MY_DB
 	});*/
 	connection.connect( function(err)
 	{
@@ -35,6 +31,11 @@ this.INIT = function( host, port, user, pass, database, callback )
 			return callback( false );
 		}
 	});
+	mDB.DB_PROCESS_01 = DB_PROCESS_01;
+	mDB.DB_PROCESS_02 = DB_PROCESS_02;
+	mDB.DB_PROCESS_03 = DB_PROCESS_03;
+	mDB.DB_PROCESS_04 = DB_PROCESS_04;
+	mDB.DB_PROCESS_05 = DB_PROCESS_05;
 	return callback( true );
 }
 var DB_QUERY = function ( mQuery1, mQuery2, callback )
@@ -57,12 +58,12 @@ var DB_MAKE_QUERY_FOR_AVATAR = function ( tSort, tUserIndex, tCharSlot, callback
 	switch( tSort )
 	{
 		case 0 :
-			if(user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aName == '')
+			if( mUSER[tUserIndex].uAvatarInfo[tCharSlot].aName == '' )
 			{
 				return callback( true );
 			}
 			mQuery = 'select * from ?? where aName = ?';
-			nQuery = [ config.MY_TB03, user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aName ];
+			nQuery = [ MY_TB03, mUSER[tUserIndex].uAvatarInfo[tCharSlot].aName ];
 			DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
 			{
 				if ( !returnStatus )
@@ -75,27 +76,27 @@ var DB_MAKE_QUERY_FOR_AVATAR = function ( tSort, tUserIndex, tCharSlot, callback
 					console.log("DB_MAKE_QUERY_FOR_AVATAR 0.1");
 					return callback( false );
 				}
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aVisibleState = returnData.aVisibleState;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aSpecialState = returnData.aSpecialState;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aPlayTime1 = returnData.aPlayTime1;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aPlayTime2 = returnData.aPlayTime2;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aKillOtherTribe = returnData.aKillOtherTribe;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aName = returnData.aName;
-				//user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aFree01 = 0;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aTribe = returnData.aTribe;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aPreviousTribe = returnData.aPreviousTribe;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aGender = returnData.aGender;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aHeadType = returnData.aHeadType;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aFaceType = returnData.aFaceType;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLevel1 = returnData.aLevel1;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLevel2 = returnData.aLevel2;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aGeneralExperience1 = returnData.aGeneralExperience1;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aGeneralExperience2 = returnData.aGeneralExperience2;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aVit = returnData.aVit;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aStr = returnData.aStr;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aInt = returnData.aInt;
-				user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aDex = returnData.aDex;
-				//console.log(user.mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLevel1);
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aVisibleState = returnData.aVisibleState;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aSpecialState = returnData.aSpecialState;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aPlayTime1 = returnData.aPlayTime1;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aPlayTime2 = returnData.aPlayTime2;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aKillOtherTribe = returnData.aKillOtherTribe;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aName = returnData.aName;
+				//mUSER[tUserIndex].uAvatarInfo[tCharSlot].aFree01 = 0;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aTribe = returnData.aTribe;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aPreviousTribe = returnData.aPreviousTribe;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aGender = returnData.aGender;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aHeadType = returnData.aHeadType;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aFaceType = returnData.aFaceType;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLevel1 = returnData.aLevel1;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLevel2 = returnData.aLevel2;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aGeneralExperience1 = returnData.aGeneralExperience1;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aGeneralExperience2 = returnData.aGeneralExperience2;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aVit = returnData.aVit;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aStr = returnData.aStr;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aInt = returnData.aInt;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aDex = returnData.aDex;
+				//console.log(mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLevel1);
 				return callback( true );
 			});
 		return;
@@ -104,10 +105,10 @@ var DB_MAKE_QUERY_FOR_AVATAR = function ( tSort, tUserIndex, tCharSlot, callback
 		default : return callback( false );
 	}
 }
-this.DB_PROCESS_01 = function( callback )
+var DB_PROCESS_01 = function( callback )
 {
 	mQuery = 'select * from ??';
-	nQuery = [ config.MY_TB01 ];
+	nQuery = [ MY_TB01 ];
 	DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
 	{
 		if ( !returnStatus )
@@ -121,7 +122,7 @@ this.DB_PROCESS_01 = function( callback )
 		return callback( true );
 	});
 }
-this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
+var DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 {
 	var index01;
 	var uSaveMoney;
@@ -130,7 +131,7 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 	var aName = [];
 	
 	mQuery = 'select * from ?? where uID = ?';
-	nQuery = [ config.MY_TB02, tID ];
+	nQuery = [ MY_TB02, tID ];
 	DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
 	{
 		if ( !returnStatus )
@@ -149,13 +150,13 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 			console.log( "Wrong Password ", mGAME.BufToStr( tPassword ),": Real Password is : ", returnData.uPassword );
 			return callback ( 7 );
 		}
-		user.mUSER[tUserIndex].uID = returnData.uID;
-		user.mUSER[tUserIndex].uUserSort = returnData.uUserSort;
-		user.mUSER[tUserIndex].uMousePassword = returnData.uMousePassword;
+		mUSER[tUserIndex].uID = returnData.uID;
+		mUSER[tUserIndex].uUserSort = returnData.uUserSort;
+		mUSER[tUserIndex].uMousePassword = returnData.uMousePassword;
 		console.log("The account and password are correct");
 		
 		mQuery = 'select count(uID) as uIDNum from ?? where uID = ?';
-		nQuery = [ config.MY_TB04, tID ];
+		nQuery = [ MY_TB04, tID ];
 		DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
 		{
 			if ( !returnStatus )
@@ -179,7 +180,7 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 				aName[2] = '';
 				console.log(uSaveItem);
 				mQuery = 'insert into ?? set ?';
-				nQuery = [ config.MY_TB04, { uID: tID, uSaveMoney: uSaveMoney, uSaveMoney2: uSaveMoney2, uSaveItem: uSaveItem, aName01: aName[0], aName02: aName[1], aName03: aName[2] } ];
+				nQuery = [ MY_TB04, { uID: tID, uSaveMoney: uSaveMoney, uSaveMoney2: uSaveMoney2, uSaveItem: uSaveItem, aName01: aName[0], aName02: aName[1], aName03: aName[2] } ];
 				DB_QUERY( mQuery, nQuery, function ( returnStatus )
 				{
 					if ( !returnStatus )
@@ -193,7 +194,7 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 			else
 			{
 				mQuery = 'update ?? set uLoginState = 0, uIP = ? where uID = ?';
-				nQuery = [ config.MY_TB04, tIP, tID ];
+				nQuery = [ MY_TB04, tIP, tID ];
 				DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
 				{
 					if ( !returnStatus )
@@ -202,7 +203,7 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 						return callback ( 5 );
 					}	
 					mQuery = 'select * from ?? where uID = ?';
-					nQuery = [ config.MY_TB04, tID ];
+					nQuery = [ MY_TB04, tID ];
 					DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
 					{
 						if ( !returnStatus )
@@ -217,10 +218,10 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 						uSaveMoney = returnData.uSaveMoney;
 						uSaveMoney2 = returnData.uSaveMoney2;
 						uSaveItem = returnData.uSaveItem;
-						user.mUSER[tUserIndex].uAvatarInfo[0].aName = returnData.aName01;
-						user.mUSER[tUserIndex].uAvatarInfo[1].aName = returnData.aName02;
-						user.mUSER[tUserIndex].uAvatarInfo[2].aName = returnData.aName03;
-						//for (index01 = 0; index01 < config.MAX_SAVE_ITEM_SLOT_NUM; index01++)
+						mUSER[tUserIndex].uAvatarInfo[0].aName = returnData.aName01;
+						mUSER[tUserIndex].uAvatarInfo[1].aName = returnData.aName02;
+						mUSER[tUserIndex].uAvatarInfo[2].aName = returnData.aName03;
+						//for (index01 = 0; index01 < MAX_SAVE_ITEM_SLOT_NUM; index01++)
 						//{
 							//5
 							//3
@@ -258,10 +259,10 @@ this.DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 		});
 	});
 }
-this.DB_PROCESS_03 = function( tID, tMousePassword, callback )
+var DB_PROCESS_03 = function( tID, tMousePassword, callback )
 {
 	mQuery = 'update ?? set uMousePassword = ? where uID = ?';
-	nQuery = [ config.MY_TB02, tMousePassword, tID ];
+	nQuery = [ MY_TB02, tMousePassword, tID ];
 	DB_QUERY( mQuery, nQuery, function ( returnStatus )
 	{
 		if ( !returnStatus )
@@ -272,12 +273,12 @@ this.DB_PROCESS_03 = function( tID, tMousePassword, callback )
 		return callback( true );
 	});
 }
-this.DB_PROCESS_04 = function( tUserIndex, tAvatarPost, tAvatarInfo, callback )
+var DB_PROCESS_04 = function( tUserIndex, tAvatarPost, tAvatarInfo, callback )
 {
 	mQuery = 'insert into ?? set ?';
-	nQuery = [ config.MY_TB03, {
+	nQuery = [ MY_TB03, {
 	aInsertTime: 'now()',
-	uID: user.mUSER[tUserIndex].uID,
+	uID: mUSER[tUserIndex].uID,
 	aVisibleState: tAvatarInfo.aVisibleState,
 	aSpecialState: tAvatarInfo.aSpecialState,
 	aPlayTime1: tAvatarInfo.aPlayTime1,
@@ -296,7 +297,13 @@ this.DB_PROCESS_04 = function( tUserIndex, tAvatarPost, tAvatarInfo, callback )
 	aVit: tAvatarInfo.aVit,
 	aStr: tAvatarInfo.aStr,
 	aInt: tAvatarInfo.aInt,
-	aDex: tAvatarInfo.aDex
+	aDex: tAvatarInfo.aDex,
+	aLogoutInfo01: tAvatarInfo.aLogoutInfo[0],
+	aLogoutInfo02: tAvatarInfo.aLogoutInfo[1],
+	aLogoutInfo03: tAvatarInfo.aLogoutInfo[2],
+	aLogoutInfo04: tAvatarInfo.aLogoutInfo[3],
+	aLogoutInfo05: tAvatarInfo.aLogoutInfo[4],
+	aLogoutInfo06: tAvatarInfo.aLogoutInfo[5]
 	} ];
 	DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
 	{
@@ -313,13 +320,13 @@ this.DB_PROCESS_04 = function( tUserIndex, tAvatarPost, tAvatarInfo, callback )
 		default : DB_QUERY( mQuery, nQuery );//delete character in avatarinfo if cant update name in masterinfo
 		return callback( 1 );
 		}
-		nQuery = [ config.MY_TB04, tAvatarInfo.aName, user.mUSER[tUserIndex].uID ];
+		nQuery = [ MY_TB04, tAvatarInfo.aName, mUSER[tUserIndex].uID ];
 		DB_QUERY( mQuery, nQuery, function ( returnStatus )
 		{
 			if ( !returnStatus )
 			{
 				mQuery = 'delete ?? where aName = ?';
-				nQuery = [ config.MY_TB03, tAvatarInfo.aName ];
+				nQuery = [ MY_TB03, tAvatarInfo.aName ];
 				DB_QUERY( mQuery, nQuery );//delete character in avatarinfo if cant update name in masterinfo
 				console.log("DB_PROCESS_04 ERROR");
 				return callback( 1 );
@@ -328,10 +335,10 @@ this.DB_PROCESS_04 = function( tUserIndex, tAvatarPost, tAvatarInfo, callback )
 		});
 	});
 }
-this.DB_PROCESS_05 = function( tUserIndex, tAvatarPost, callback )
+var DB_PROCESS_05 = function( tUserIndex, tAvatarPost, callback )
 {
 	mQuery = 'delete from ?? where aName = ?';
-	nQuery = [ config.MY_TB03, user.mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName ];
+	nQuery = [ MY_TB03, mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName ];
 	DB_QUERY( mQuery, nQuery, function ( returnStatus )
 	{
 		if ( !returnStatus )
@@ -346,7 +353,7 @@ this.DB_PROCESS_05 = function( tUserIndex, tAvatarPost, callback )
 		case 2: mQuery = 'update ?? set aName03 = ? where uID = ?'; break;
 		default : return callback( 1 );
 		}
-		nQuery = [ config.MY_TB04, '', user.mUSER[tUserIndex].uID ];
+		nQuery = [ MY_TB04, '', mUSER[tUserIndex].uID ];
 		DB_QUERY( mQuery, nQuery, function ( returnStatus )
 		{
 			if ( !returnStatus )
@@ -358,4 +365,4 @@ this.DB_PROCESS_05 = function( tUserIndex, tAvatarPost, callback )
 		});
 	});
 }
-module.exports = this;
+module.exports = global;
