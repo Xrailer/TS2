@@ -1,11 +1,11 @@
-var mSERVER = require('./server/s_server');
-mSERVER.INIT( function( callback ) 
+var mLOGIN = require('./server/s_server');
+mLOGIN.INIT( function( callback ) 
 {
 	if(callback == false)
 	{
-		console.log("Error::mSERVER Init()");
+		console.log("Error::mLOGIN");
 		process.exit(1);
 		return;
 	}
-	console.log("mSERVER Init()");
+	console.log("mLOGIN Started");
 });

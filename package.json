@@ -1,5 +1,5 @@
 {
-  "name": "ts2_ns",
+  "name": "ts2",
   "version": "1.0.0",
   "description": "Twelve Sky2 project with Node.js",
   "main": "main.js",
@@ -16,7 +16,7 @@
   "author": "DOS",
   "license": "GNU GPL",
   "dependencies": {
-    "c-struct": "0.0.3",
+    "ezstruct": "0.0.3",
     "mysql": "^2.13.0",
     "net": "^1.0.2"
   }
