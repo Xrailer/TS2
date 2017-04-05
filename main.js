@@ -3,9 +3,9 @@ mSERVER.INIT( function( callback )
 {
 	if(callback == false)
 	{
-		console.log("Error::Server Init()");
+		console.log("Error::mSERVER Init()");
 		process.exit(1);
 		return;
 	}
-	console.log("Server Init()");
+	console.log("mSERVER Init()");
 });
