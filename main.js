@@ -1,4 +1,4 @@
-var mLOGIN = require('./server/s_server');
+var mLOGIN = require('./login/s_server');
 mLOGIN.INIT( function( callback ) 
 {
 	if(callback == false)
