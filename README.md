@@ -21,10 +21,10 @@
 # Progress
 
 
-Login Server 10%
+Login Server 40%
 - Login Account 30%
 - Create 2nd Password 100%
-- Change 2nd Password 0%;
+- Change 2nd Password 0%
 - Login 2nd Password 80%
 - Create Character 70%
 - Load Character 70%
