@@ -69,7 +69,6 @@ this.INIT = function( callback )
 this.Accept = function( socket )
 {
 	var tProtocol;
-	var wf;
 	var tRecvSizeFromUser;
 	var tempUserIndex;
 	
@@ -93,11 +92,13 @@ this.Accept = function( socket )
 	console.log('new client connection from %s , tUI:%d', socket.remoteAddress, tempUserIndex);
 	mUSER[tempUserIndex].uIP = socket.remoteAddress;
 	mUSER[tempUserIndex].uSocket = socket;
-	mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
-		
+	//mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
+	
+	mUSER[tempUserIndex].uSaveItem = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	
 	mUSER[tempUserIndex].uAvatarInfo[0] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
 	mUSER[tempUserIndex].uAvatarInfo[1] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-	mUSER[tempUserIndex].uAvatarInfo[2] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[2] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );		
 	mUSER[tempUserIndex].uAvatarInfo[0] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[0] );
 	mUSER[tempUserIndex].uAvatarInfo[1] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[1] );
 	mUSER[tempUserIndex].uAvatarInfo[2] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[2] );
@@ -134,8 +135,8 @@ this.Accept = function( socket )
 		tProtocol = parseInt( mUSER[tempUserIndex].uBUFFER_FOR_RECV[8] );
 		if( mWORK[tProtocol].PROC == undefined )
 		{
-			console.log('Undefined = Packet Header: ', tProtocol, ',Length:', mUSER[tempUserIndex].uBUFFER_FOR_RECV);
-			mUSER[tempUserIndex].uSocket.destroy();
+			console.log( 'Undefined = Packet Header: ', tProtocol, ',Length:', tRecvSizeFromUser );
+			mUSER[tempUserIndex].Quit( tempUserIndex );
 			return;
 		}
 		if( mUSER[tempUserIndex].uTotalRecvSize < mWORK[tProtocol].SIZE )
@@ -144,25 +145,21 @@ this.Accept = function( socket )
 			//socket.destroy();
 			return;
 		}
-		//wf = mWORK.W_FUNCTION( tProtocol );
-		//if ( wf in mWORK && typeof mWORK[wf] === "function" )
-		//{
-			if( mUSER[tempUserIndex].uTotalRecvSize >= mWORK[tProtocol].SIZE )
+		if( mUSER[tempUserIndex].uTotalRecvSize >= mWORK[tProtocol].SIZE )
+		{
+			mWORK[tProtocol].PROC( tempUserIndex );
+			if( mUSER[tempUserIndex].uCheckConnectState )
 			{
-				mWORK[tProtocol].PROC( tempUserIndex );
-				if( mUSER[tempUserIndex].uCheckConnectState )
-				{
-					mUSER[tempUserIndex].uBUFFER_FOR_RECV.copy( mUSER[tempUserIndex].uBUFFER_FOR_RECV, 0, mWORK[tProtocol].SIZE, mUSER[tempUserIndex].uTotalRecvSize);
-					mUSER[tempUserIndex].uTotalRecvSize -= mWORK[tProtocol].SIZE;
-				}
+				mUSER[tempUserIndex].uBUFFER_FOR_RECV.copy( mUSER[tempUserIndex].uBUFFER_FOR_RECV, 0, mWORK[tProtocol].SIZE, mUSER[tempUserIndex].uTotalRecvSize);
+				mUSER[tempUserIndex].uTotalRecvSize -= mWORK[tProtocol].SIZE;
 			}
-		//}		
+		}	
 	}
 }
 //timer2
 setInterval(function()
 {	
-	mGAME.mTickCount = mGAME.GetTickCount();
+	//mGAME.mTickCount = mGAME.GetTickCount();
 	//console.log("mTickCount", mGAME.mTickCount);
 	/*for( var index01 = 0 ; index01 < MAX_USER_FOR_LOGIN ; index01++ )
 	{

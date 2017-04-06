@@ -110,6 +110,12 @@ var DB_MAKE_QUERY_FOR_AVATAR = function ( tSort, tUserIndex, tCharSlot, callback
 					aEquip = aEquip.substring(8);
 					//console.log( sprintf( '%05d %03d %09d %08d', mUSER[tUserIndex].uAvatarInfo[tCharSlot].aEquip[index01][0], mUSER[tUserIndex].uAvatarInfo[tCharSlot].aEquip[index01][1], mUSER[tUserIndex].uAvatarInfo[tCharSlot].aEquip[index01][2], mUSER[tUserIndex].uAvatarInfo[tCharSlot].aEquip[index01][3] ) );			
 				}
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLogoutInfo[0] = returnData.aLogoutInfo01;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLogoutInfo[1] = returnData.aLogoutInfo02;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLogoutInfo[2] = returnData.aLogoutInfo03;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLogoutInfo[3] = returnData.aLogoutInfo04;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLogoutInfo[4] = returnData.aLogoutInfo05;
+				mUSER[tUserIndex].uAvatarInfo[tCharSlot].aLogoutInfo[5] = returnData.aLogoutInfo06;
 				return callback( true );
 			});
 		return;
@@ -214,7 +220,7 @@ var DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 					{
 						console.log("DB_PROCESS_02 ERROR");
 						return callback ( 5 );
-					}	
+					}
 					mQuery = 'select * from ?? where uID = ?';
 					nQuery = [ MY_TB04, tID ];
 					DB_QUERY( mQuery, nQuery, function ( returnStatus, returnData )
@@ -267,6 +273,7 @@ var DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 							});
 						});
 					});
+					
 				});
 			}
 		});
@@ -293,10 +300,10 @@ var DB_PROCESS_04 = function( tUserIndex, tAvatarPost, tAvatarInfo, callback )
 	{
 		aEquip += sprintf('%05d%03d%09d%08d', tAvatarInfo.aEquip[index01][0], tAvatarInfo.aEquip[index01][1], tAvatarInfo.aEquip[index01][2], tAvatarInfo.aEquip[index01][3] );
 	}
-	console.log(aEquip);
+	//console.log(aEquip);
 	mQuery = 'insert into ?? set ?';
 	nQuery = [ MY_TB03, {
-	aInsertTime: 'now()',
+	aInsertTime: mGAME.ReturnTime(),
 	uID: mUSER[tUserIndex].uID,
 	aVisibleState: tAvatarInfo.aVisibleState,
 	aSpecialState: tAvatarInfo.aSpecialState,

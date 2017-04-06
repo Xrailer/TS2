@@ -2,15 +2,16 @@ global.mTRANSFER = {};
 global.TransferInit = function( callback )
 {
 	mTRANSFER.mOriginal 					= Buffer.alloc(10000).fill( 0 );
-	mTRANSFER.mOriginalSize 				= 0;
-	mTRANSFER.B_CONNECT_OK 					= B_CONNECT_OK;
-	mTRANSFER.B_LOGIN_RECV 					= B_LOGIN_RECV;
-	mTRANSFER.B_USER_AVATAR_INFO 			= B_USER_AVATAR_INFO;
-	mTRANSFER.B_CREATE_MOUSE_PASSWORD_RECV 	= B_CREATE_MOUSE_PASSWORD_RECV;
-	mTRANSFER.B_LOGIN_MOUSE_PASSWORD_RECV 	= B_LOGIN_MOUSE_PASSWORD_RECV;
-	mTRANSFER.B_CREATE_AVATAR_RECV 			= B_CREATE_AVATAR_RECV;
-	mTRANSFER.B_DELETE_AVATAR_RECV 			= B_DELETE_AVATAR_RECV;
-	mTRANSFER.B_RCMD_WORLD_SEND 			= B_RCMD_WORLD_SEND;
+	mTRANSFER.mOriginalSize 					= 0;
+	mTRANSFER.B_CONNECT_OK 						= B_CONNECT_OK;
+	mTRANSFER.B_LOGIN_RECV 						= B_LOGIN_RECV;
+	mTRANSFER.B_USER_AVATAR_INFO 				= B_USER_AVATAR_INFO;
+	mTRANSFER.B_CREATE_MOUSE_PASSWORD_RECV 		= B_CREATE_MOUSE_PASSWORD_RECV;
+	mTRANSFER.B_LOGIN_MOUSE_PASSWORD_RECV 		= B_LOGIN_MOUSE_PASSWORD_RECV;
+	mTRANSFER.B_CREATE_AVATAR_RECV 				= B_CREATE_AVATAR_RECV;
+	mTRANSFER.B_DELETE_AVATAR_RECV 				= B_DELETE_AVATAR_RECV;
+	mTRANSFER.B_DEMAND_ZONE_SERVER_INFO_1_RECV	= B_DEMAND_ZONE_SERVER_INFO_1_RECV;
+	mTRANSFER.B_RCMD_WORLD_SEND 				= B_RCMD_WORLD_SEND;
 	return callback( true );
 }
 var B_CONNECT_OK = function( tRandomNumber, tMaxPlayerNum, tGagePlayerNum, tPresentPlayerNum )
@@ -41,7 +42,7 @@ var B_USER_AVATAR_INFO = function( tAvatarInfo )
 	mTRANSFER.mOriginalSize = S_USER_AVATAR_INFO;
 	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
 	mTRANSFER.mOriginal.writeInt8( P_USER_AVATAR_INFO );
-	var mCopy = new Buffer( pckAvatar( 1, tAvatarInfo ) ).copy( mTRANSFER.mOriginal, 1 , 0, SIZE_OF_AVATAR_INFO );//mTRANSFER.mOriginal.write( pckAvatar( 1, tAvatarInfo ).toString(), 1 );
+	var mCopy = new Buffer( pckAvatar( 1, tAvatarInfo ) ).copy( mTRANSFER.mOriginal, 1 , 0, SIZE_OF_AVATAR_INFO );
 	//console.log(mTRANSFER.mOriginal);
 }
 var B_CREATE_MOUSE_PASSWORD_RECV = function( tResult, tMousePassword )
@@ -67,7 +68,7 @@ var B_CREATE_AVATAR_RECV = function( tResult, tAvatarInfo )
 	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
 	mTRANSFER.mOriginal.writeInt8( P_CREATE_AVATAR_RECV );
 	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
-	var mCopy = new Buffer( pckAvatar( 1, tAvatarInfo ) ).copy( mTRANSFER.mOriginal, 5 , 0, SIZE_OF_AVATAR_INFO );//mTRANSFER.mOriginal.write( pckAvatar( 1, tAvatarInfo ).toString(), 5 );
+	var mCopy = new Buffer( pckAvatar( 1, tAvatarInfo ) ).copy( mTRANSFER.mOriginal, 5 , 0, SIZE_OF_AVATAR_INFO );
 	//console.log(mTRANSFER.mOriginal);	
 }
 var B_DELETE_AVATAR_RECV = function( tResult )
@@ -76,6 +77,17 @@ var B_DELETE_AVATAR_RECV = function( tResult )
 	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
 	mTRANSFER.mOriginal.writeInt8( P_CREATE_AVATAR_RECV );
 	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
+	//console.log(mTRANSFER.mOriginal);
+}
+var B_DEMAND_ZONE_SERVER_INFO_1_RECV = function( tResult, tIP, tPort, tZone )
+{
+	mTRANSFER.mOriginalSize = S_DEMAND_ZONE_SERVER_INFO_1_RECV;
+	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
+	mTRANSFER.mOriginal.writeInt8( P_DEMAND_ZONE_SERVER_INFO_1_RECV );
+	mTRANSFER.mOriginal.writeInt32LE( tResult, 1 );
+	mTRANSFER.mOriginal.write( tIP.toString(), 5, 16 );
+	mTRANSFER.mOriginal.writeInt32LE( tPort, 5+16 );
+	mTRANSFER.mOriginal.writeInt32LE( tZone, 4+5+16 );
 	//console.log(mTRANSFER.mOriginal);
 }
 var B_RCMD_WORLD_SEND = function()

@@ -27,11 +27,11 @@ global.WorkInit = function( callback )
 	WORKER_FUNCTION[P_DEMAND_GIFT_SEND] = 'W_DEMAND_GIFT_SEND';
 	WORKER_PACKETSIZE[P_DEMAND_GIFT_SEND] = S_DEMAND_GIFT_SEND;
 	WORKER_FUNCTION[P_WANT_GIFT_SEND] = 'W_WANT_GIFT_SEND';
-	WORKER_PACKETSIZE[P_WANT_GIFT_SEND] = S_WANT_GIFT_SEND;
-	WORKER_FUNCTION[P_DEMAND_ZONE_SERVER_INFO_1] = 'W_DEMAND_ZONE_SERVER_INFO_1';
-	WORKER_PACKETSIZE[P_DEMAND_ZONE_SERVER_INFO_1] = S_DEMAND_ZONE_SERVER_INFO_1;
-	WORKER_FUNCTION[P_FAIL_MOVE_ZONE_1_SEND] = 'W_FAIL_MOVE_ZONE_1_SEND';
-	WORKER_PACKETSIZE[P_FAIL_MOVE_ZONE_1_SEND] = S_FAIL_MOVE_ZONE_1_SEND;*/
+	WORKER_PACKETSIZE[P_WANT_GIFT_SEND] = S_WANT_GIFT_SEND;*/
+	mWORK[P_DEMAND_ZONE_SERVER_INFO_1_SEND].PROC = W_DEMAND_ZONE_SERVER_INFO_1_SEND;
+	mWORK[P_DEMAND_ZONE_SERVER_INFO_1_SEND].SIZE = S_DEMAND_ZONE_SERVER_INFO_1_SEND;
+	mWORK[P_FAIL_MOVE_ZONE_1_SEND].PROC = W_FAIL_MOVE_ZONE_1_SEND;
+	mWORK[P_FAIL_MOVE_ZONE_1_SEND].SIZE = S_FAIL_MOVE_ZONE_1_SEND;
 	return callback(true);
 }
 var W_LOGIN_SEND = function( tUserIndex )
@@ -41,7 +41,7 @@ var W_LOGIN_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 
 	var tID = new Buffer( MAX_USER_ID_LENGTH ).fill( 0 );
 	var tPassword = new Buffer(MAX_USER_PASSWORD_LENGTH).fill( 0 );
@@ -128,7 +128,7 @@ var W_CLIENT_OK_FOR_LOGIN_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 }
 var W_CREATE_MOUSE_PASSWORD_SEND = function( tUserIndex )
 {
@@ -147,7 +147,7 @@ var W_CREATE_MOUSE_PASSWORD_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 	
 	var tMousePassword = new Buffer( MAX_MOUSE_PASSWORD_LENGTH ).fill( 0 );
 	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
@@ -184,7 +184,7 @@ var W_CHANGE_MOUSE_PASSWORD_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 }
 var W_LOGIN_MOUSE_PASSWORD_SEND = function ( tUserIndex )
 {
@@ -203,7 +203,7 @@ var W_LOGIN_MOUSE_PASSWORD_SEND = function ( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 	
 	var tMousePassword = new Buffer( MAX_MOUSE_PASSWORD_LENGTH ).fill( 0 );
 	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
@@ -558,5 +558,48 @@ var W_DELETE_AVATAR_SEND = function( tUserIndex )
 		mTRANSFER.B_DELETE_AVATAR_RECV( 0 );
 		mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );		
 	});
+}
+var W_DEMAND_ZONE_SERVER_INFO_1_SEND = function( tUserIndex )
+{
+	if (!mUSER[tUserIndex].uCheckValidState)
+	{
+		mUSER[tUserIndex].Quit( tUserIndex );
+		return;
+	}
+	if (mUSER[tUserIndex].uSecondLoginSort != 0)
+	{
+		console.log("!MOTP are not certified by the state can not ask the server information.");
+		mUSER[tUserIndex].Quit( tUserIndex );
+		return;
+	}
+	if (mUSER[tUserIndex].uMoveZoneResult == 1)
+	{
+		console.log("!Go to the status of the client not be able to request information on the server.");
+		mUSER[tUserIndex].Quit( tUserIndex );
+		return;
+	}
+	//mUSER[tUserIndex].uUsedTime = GetTickCount();
+
+	var tAvatarPost = new Buffer( 4 ).fill( 0 );
+	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
+	tPacket.copy( tPacket, 0 , 9, tPacket.length );
+	tPacket.copy( tAvatarPost, 0, 0, 4 );
+		
+	tAvatarPost = tAvatarPost.readInt32LE();
+	console.log("tAvatarPost",tAvatarPost);
+
+	if ( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) || ( mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName == '' ) )
+	{
+		mUSER[tUserIndex].Quit( tUserIndex );
+		return;
+	}
+
+	//mUSER[tUserIndex].mRegisterTime = GetTickCount();
+	mUSER[tUserIndex].uMoveZoneResult = 1;
+	mTRANSFER.B_DEMAND_ZONE_SERVER_INFO_1_RECV( 0, ZONE_IP, ZONE_PO, mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aLogoutInfo[0] );
+	mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+}
+var W_FAIL_MOVE_ZONE_1_SEND = function( tUserIndex )
+{
 }
 module.exports = global;

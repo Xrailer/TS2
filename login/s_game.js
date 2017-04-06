@@ -1,4 +1,4 @@
-global.mGAME = {};
+global.mGAME = [];
 global.GameInit = function( callback )
 {
 	mGAME.mTickCount = 0;
@@ -11,6 +11,7 @@ global.GameInit = function( callback )
 	mGAME.CheckNameString = CheckNameString;
 	mGAME.BufToStr = BufToStr;
 	mGAME.StrToBuf = StrToBuf;
+	mGAME.ReturnTime = ReturnTime;
 	mDB.DB_PROCESS_01( function( callback ) 
 	{
 		if(callback == false)
@@ -55,8 +56,13 @@ var BufToStr = function(buf)
 {
 	return buf.toString('utf8').replace(/\0/g, '');
 }
-var StrToBuf = function(string)
+var StrToBuf = function(str)
 {
-	return Buffer(string);
+	return Buffer(str);
+}
+var ReturnTime = function()
+{
+	var date = new Date();
+	return sprintf( '%04d-%02d-%02d %02d:%02d:%02d', date.getFullYear(), ( date.getMonth() + 1 ), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds() );
 }
 module.exports = global;
