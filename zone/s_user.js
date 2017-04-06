@@ -6,13 +6,14 @@ global.UserInit = function( callback )
 	var index01;
 	var index02;
 	var index03;
-	for( index01 = 0; index01 < MAX_USER_FOR_LOGIN; index01++ )
+	for( index01 = 0; index01 < MAX_USER_FOR_ZONE; index01++ )
 	{
 		mUSER[index01] = {
 			'uID' : '',
 			'uIP' : '',
 			'uCheckConnectState' : false,
 			'uCheckValidState' : false,
+			'uCheckTempRegister' : false,
 			'uUserSort' : 0,
 			'uMousePassword' : '',
 			'uSecondLoginSort' : 0,
@@ -23,14 +24,12 @@ global.UserInit = function( callback )
 			'uTotalRecvSize' : 0,
 			'uTotalSendSize' : 0,
 			'uSocket' : 0,
-			'uAvatarInfo' : [],
+			'uAvatarInfo' : {},
 			'uSaveItem' : [] 
 		};
 		mUSER[index01].uBUFFER_FOR_RECV = Buffer.alloc( MAX_RECV_BUFFER_SIZE ).fill( 0 );
 		mUSER[index01].uBUFFER_FOR_SEND = Buffer.alloc( MAX_SEND_BUFFER_SIZE ).fill( 0 );
-		mUSER[index01].uAvatarInfo[0] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-		mUSER[index01].uAvatarInfo[1] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-		mUSER[index01].uAvatarInfo[2] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+		mUSER[index01].uAvatarInfo = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
 		for( index02 = 0; index02 < MAX_SAVE_ITEM_SLOT_NUM; index02++ )
 		{
 			mUSER[index01].uSaveItem[index02] = [];
@@ -80,6 +79,7 @@ var Quit = function( tUserIndex )
 	}
 	mUSER[tUserIndex].uCheckConnectState = false;
 	mUSER[tUserIndex].uCheckValidState = false;
+	mUSER[tUserIndex].uCheckTempRegister = false;
 	mUSER[tUserIndex].uTotalRecvSize = 0;
 	mUSER[tUserIndex].uTotalSendSize = 0;
 	mUSER[tUserIndex].uBUFFER_FOR_RECV.fill( 0 );
