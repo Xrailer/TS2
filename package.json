@@ -2,7 +2,7 @@
   "name": "ts2",
   "version": "1.0.0",
   "description": "Twelve Sky2 project with Node.js",
-  "main": "main.js",
+  "main": "",
   "scripts": {
     "test": "s"
   },
