@@ -7,7 +7,7 @@ var Transfer = require('./s_transfer');
 var User = require('./s_user');
 var Game = require('./s_game');
 var mDB = require('./s_mysql');
-global.sprintf = require("sprintf-js").sprintf;
+global.sprintf = require('sprintf-js').sprintf;
 
 this.INIT = function( callback )
 {
