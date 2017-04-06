@@ -6,7 +6,7 @@ var Worker = require('./s_worker');
 var Transfer = require('./s_transfer');
 var User = require('./s_user');
 var Game = require('./s_game');
-var Game4 = require('./s_game_4');
+var mDB = require('./s_mysql');
 global.sprintf = require("sprintf-js").sprintf;
 
 this.INIT = function( callback )
@@ -42,6 +42,16 @@ this.INIT = function( callback )
 		}
 		console.log("mUSER Init()");
 	});
+	MysqlInit( MY_HOST, MY_PORT, MY_USER, MY_PASS, MY_DB, function( callback )
+	{
+		if(callback == false)
+		{
+			console.log("Error::mDB Init()");
+			process.exit(1);
+			return;
+		}
+		console.log("mDB Init()");
+	});
 	GameInit( function( callback ) 
 	{
 		if(callback == false)
@@ -52,17 +62,7 @@ this.INIT = function( callback )
 		}
 		console.log("mGAME Init()");
 	});
-	AvatarInit( function( callback ) 
-	{
-		if(callback == false)
-		{
-			console.log("Error::mAVATAR_OBJECT Init()");
-			process.exit(1);
-			return;
-		}
-		console.log("mAVATAR_OBJECT Init()");
-	});
-	Server.listen(ZONE_PO, ZONE_IP);
+	Server.listen(LOGIN_PO, LOGIN_IP);
 	Server.on('connection', this.Accept);
 	return callback(true);
 }
@@ -74,7 +74,7 @@ this.Accept = function( socket )
 	
 	for( tempUserIndex = 0; tempUserIndex < MAX_USER_FOR_LOGIN; tempUserIndex++ )
 	{
-		if( mUSER[tempUserIndex].uCheckConnectState == false )
+		if( mUSER[tempUserIndex].uCheckConnectState === false )
 		{
 			break;
 		}
@@ -93,14 +93,17 @@ this.Accept = function( socket )
 	mUSER[tempUserIndex].uIP = socket.remoteAddress;
 	mUSER[tempUserIndex].uSocket = socket;
 	//mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
-		
-	mUSER[tempUserIndex].uAvatarInfo = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-	mUSER[tempUserIndex].uAvatarInfo = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo );
 	
-	mAVATAR_OBJECT[tempUserIndex].mDATA = Buffer.alloc( SIZE_OF_OBJECT_FOR_AVATAR ).fill( 0 );
-	mAVATAR_OBJECT[tempUserIndex].uAvatarInfo = pckObjectAvatar( 0, mAVATAR_OBJECT[tempUserIndex].mDATA );
+	mUSER[tempUserIndex].uSaveItem = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
 	
-	mTRANSFER.B_CONNECT_OK( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[0] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[1] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[2] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );		
+	mUSER[tempUserIndex].uAvatarInfo[0] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[0] );
+	mUSER[tempUserIndex].uAvatarInfo[1] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[1] );
+	mUSER[tempUserIndex].uAvatarInfo[2] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[2] );
+	
+	mTRANSFER.B_CONNECT_OK( 0, mGAME.mMaxPlayerNum, mGAME.mGagePlayerNum, ( mGAME.mPresentPlayerNum + mGAME.mAddPlayerNum ) );
 	mUSER[tempUserIndex].Send( tempUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
 	
 	//socket.on('close', Close);
@@ -155,6 +158,24 @@ this.Accept = function( socket )
 }
 //timer2
 setInterval(function()
-{
+{	
+	//mGAME.mTickCount = mGAME.GetTickCount();
+	//console.log("mTickCount", mGAME.mTickCount);
+	/*for( var index01 = 0 ; index01 < MAX_USER_FOR_LOGIN ; index01++ )
+	{
+		if( !mUSER[index01].uCheckConnectState )
+		{
+			continue;
+		}
+		if( ( mGAME.mTickCount - uUsedTime[index01] ) >= 60 )
+		{
+			Quit(index01);
+			continue;
+		}
+		if( !mUSER[index01].uCheckValidState )
+		{
+			continue;
+		}
+	}*/
 }, 1000);
 exports.server = this;
