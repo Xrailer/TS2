@@ -13,9 +13,11 @@
 
 6.restore game.sql in mysql folder to mysql server
 
-7.run server > node main
+7.run login > node login/run
 
-8.copy TwelveSky2.exe in client folder to TS25ELW
+8.run map > node zone/run
+
+9.copy TwelveSky2.exe in client folder to TS25ELW
 
 
 # Progress
@@ -29,7 +31,7 @@ Login Server 40%
 - Create Character 70%
 - Load Character 70%
 - Delete Character 50%
-- Enter World 0%
+- Enter World 20%
 
-Game Server 0%
-
+Game Server 1%
+- Enter Map 20%
