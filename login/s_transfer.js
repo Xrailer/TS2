@@ -27,6 +27,8 @@ var B_CONNECT_OK = function( tRandomNumber, tMaxPlayerNum, tGagePlayerNum, tPres
 }
 var B_LOGIN_RECV = function( tResult, tID, tUserSort, tSecondLoginSort, tMousePassword )
 {
+	if( tID === undefined)
+		return;
 	mTRANSFER.mOriginalSize = S_LOGIN_RECV;
 	mTRANSFER.mOriginal = new Buffer( mTRANSFER.mOriginalSize ).fill( 0 );
 	mTRANSFER.mOriginal.writeInt8( P_LOGIN_RECV );
@@ -88,7 +90,7 @@ var B_DEMAND_ZONE_SERVER_INFO_1_RECV = function( tResult, tIP, tPort, tZone )
 	mTRANSFER.mOriginal.write( tIP.toString(), 5, 16 );
 	mTRANSFER.mOriginal.writeInt32LE( tPort, 5+16 );
 	mTRANSFER.mOriginal.writeInt32LE( tZone, 4+5+16 );
-	//console.log(mTRANSFER.mOriginal);
+	console.log(mTRANSFER.mOriginal);
 }
 var B_RCMD_WORLD_SEND = function()
 {

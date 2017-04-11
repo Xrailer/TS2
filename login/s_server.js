@@ -1,4 +1,6 @@
-var Net = require('net');
+global.Net = require('net');
+global.Util = require('util');
+global.sprintf = require('sprintf-js').sprintf;
 var Server = Net.createServer();
 var Config = require('../config');
 var Struct = require('../struct');
@@ -7,11 +9,11 @@ var Transfer = require('./s_transfer');
 var User = require('./s_user');
 var Game = require('./s_game');
 var mDB = require('./s_mysql');
-global.sprintf = require('sprintf-js').sprintf;
+var mConnect = require('./s_connect');
 
 this.INIT = function( callback )
 {
-	console.log('server working on %s', LOGIN_IP);
+	console.log('server working on ip:%s, port:%s', LOGIN_IP, LOGIN_PO);
 	WorkInit( function( callback ) 
 	{
 		if(callback == false)
@@ -62,8 +64,19 @@ this.INIT = function( callback )
 		}
 		console.log("mGAME Init()");
 	});
+	CharServerInit( CHAR_IP, CHAR_PO, function( callback ) 
+	{
+		if(callback == false)
+		{
+			console.log("Error::mCHAR_CONNECT Init()");
+			process.exit(1);
+			return;
+		}
+		console.log("mCHAR_CONNECT Init()");
+	});
 	Server.listen(LOGIN_PO, LOGIN_IP);
 	Server.on('connection', this.Accept);
+	console.log(mGAME.ReturnSubDate(20170411,20170412));
 	return callback(true);
 }
 this.Accept = function( socket )
@@ -92,13 +105,11 @@ this.Accept = function( socket )
 	console.log('new client connection from %s , tUI:%d', socket.remoteAddress, tempUserIndex);
 	mUSER[tempUserIndex].uIP = socket.remoteAddress;
 	mUSER[tempUserIndex].uSocket = socket;
-	//mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
-	
-	mUSER[tempUserIndex].uSaveItem = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-	
-	mUSER[tempUserIndex].uAvatarInfo[0] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-	mUSER[tempUserIndex].uAvatarInfo[1] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-	mUSER[tempUserIndex].uAvatarInfo[2] = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );		
+	mUSER[tempUserIndex].mUsedTime = mGAME.GetTickCount();
+	mUSER[tempUserIndex].uSaveItem = Buffer( SIZE_OF_AVATAR_INFO ).fill( 0 );	
+	mUSER[tempUserIndex].uAvatarInfo[0] = Buffer( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[1] = Buffer( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	mUSER[tempUserIndex].uAvatarInfo[2] = Buffer( SIZE_OF_AVATAR_INFO ).fill( 0 );		
 	mUSER[tempUserIndex].uAvatarInfo[0] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[0] );
 	mUSER[tempUserIndex].uAvatarInfo[1] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[1] );
 	mUSER[tempUserIndex].uAvatarInfo[2] = pckAvatar( 0, mUSER[tempUserIndex].uAvatarInfo[2] );
@@ -106,9 +117,9 @@ this.Accept = function( socket )
 	mTRANSFER.B_CONNECT_OK( 0, mGAME.mMaxPlayerNum, mGAME.mGagePlayerNum, ( mGAME.mPresentPlayerNum + mGAME.mAddPlayerNum ) );
 	mUSER[tempUserIndex].Send( tempUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
 	
-	//socket.on('close', Close);
-	socket.on('error', function(){});
-	socket.on('end', Close);
+	socket.on('close', Close);
+	socket.on('error', Close);
+	//socket.on('end', Close);
 	function Close()
 	{
 		mUSER[tempUserIndex].Quit( tempUserIndex );
@@ -150,7 +161,7 @@ this.Accept = function( socket )
 			mWORK[tProtocol].PROC( tempUserIndex );
 			if( mUSER[tempUserIndex].uCheckConnectState )
 			{
-				mUSER[tempUserIndex].uBUFFER_FOR_RECV.copy( mUSER[tempUserIndex].uBUFFER_FOR_RECV, 0, mWORK[tProtocol].SIZE, mUSER[tempUserIndex].uTotalRecvSize);
+				mUSER[tempUserIndex].uBUFFER_FOR_RECV.copy( mUSER[tempUserIndex].uBUFFER_FOR_RECV, 0, mWORK[tProtocol].SIZE, mUSER[tempUserIndex].uTotalRecvSize );
 				mUSER[tempUserIndex].uTotalRecvSize -= mWORK[tProtocol].SIZE;
 			}
 		}	

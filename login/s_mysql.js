@@ -171,6 +171,7 @@ var DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 		}
 		mUSER[tUserIndex].uID = returnData.uID;
 		mUSER[tUserIndex].uUserSort = returnData.uUserSort;
+		mUSER[tUserIndex].uTraceState = returnData.uTraceState;
 		mUSER[tUserIndex].uMousePassword = returnData.uMousePassword;
 		console.log("The account and password are correct");
 		
@@ -268,7 +269,7 @@ var DB_PROCESS_02 = function( tUserIndex, tID, tPassword, tIP, callback )
 										console.log("AVATAR3 ERROR");
 										return callback ( 5 );
 									}
-									callback ( 0 );
+									return callback ( 0 );
 								});
 							});
 						});

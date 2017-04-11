@@ -36,25 +36,25 @@ global.WorkInit = function( callback )
 }
 var W_LOGIN_SEND = function( tUserIndex )
 {
+	var tPacket = mUSER[tUserIndex].uBUFFER_FOR_RECV;
 	if( mUSER[tUserIndex].uCheckValidState )
 	{
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 
 	var tID = new Buffer( MAX_USER_ID_LENGTH ).fill( 0 );
 	var tPassword = new Buffer(MAX_USER_PASSWORD_LENGTH).fill( 0 );
-	var tVersion = new Buffer( 4 ).fill( 0 );
+	var tVersion;// = new Buffer( 4 ).fill( 0 );
 	var tMousePassword = new Buffer(MAX_MOUSE_PASSWORD_LENGTH).fill( 0 );
 	var index01;
 	
-	var tPacket = ( mUSER[tUserIndex].uBUFFER_FOR_RECV );
 	tPacket.copy( tPacket, 0 , 9, tPacket.length );
 	tPacket.copy( tID, 0, 0, tID.length );
 	tPacket.copy( tPassword, 0, tID.length, ( tID.length + tPassword.length ) );
-	tPacket.copy( tVersion, 0, ( tID.length + tPassword.length ), ( tID.length + tPassword.length + tVersion.length ) );
-	tVersion = tVersion.readInt32LE();	
+	//tPacket.copy( tVersion, 0, ( tID.length + tPassword.length ), ( tID.length + tPassword.length + tVersion.length ) );
+	tVersion = tPacket.readInt32LE( tID.length + tPassword.length, 4);	
 	//console.log(tID);
 	//console.log(tPassword);
 	//console.log(tVersion);
@@ -97,28 +97,56 @@ var W_LOGIN_SEND = function( tUserIndex )
 			mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
 			return;
 		}
-		mUSER[tUserIndex].uCheckValidState = true;
-		//mUSER[tUserIndex].uID = uID;
-		//mUSER[tUserIndex].uUserSort = uUserSort;
-		//mUSER[tUserIndex].uMousePassword = uMousePassword;
-		mUSER[tUserIndex].uSecondLoginSort = 1;
-		mUSER[tUserIndex].uSecondLoginTryNum = 0;
-		mUSER[tUserIndex].uMoveZoneResult = 0;
-		if (mUSER[tUserIndex].uMousePassword != '')
+		mCHAR_CONNECT.U_REGISTER_USER_FOR_LOGIN_1_SEND( tUserIndex, mUSER[tUserIndex].uIP, mUSER[tUserIndex].uID, mUSER[tUserIndex].uUserSort, mUSER[tUserIndex].uTraceState, function( tResult, PlayID )
 		{
-			tMousePassword = '****';
-		}
-		
-		//coneolse.log("success to login");
-		mTRANSFER.B_LOGIN_RECV( 0, mUSER[tUserIndex].uID, mUSER[tUserIndex].uUserSort, mUSER[tUserIndex].uSecondLoginSort, tMousePassword );
-		mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
-		for( index01 = 0 ; index01 < MAX_USER_AVATAR_NUM ; index01++ )
-		{
-			mTRANSFER.B_USER_AVATAR_INFO( mUSER[tUserIndex].uAvatarInfo[index01] );
+			console.log('mRecv_Result', tResult );
+			console.log('mRecv_PlayUserIndex', PlayID );
+			if( tResult == 1 )//already login
+			{
+				mTRANSFER.B_LOGIN_RECV( 8, tID, 0, 0, "0000" );
+				mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+				for( index01 = 0 ; index01 < MAX_USER_AVATAR_NUM ; index01++ )
+				{
+					mTRANSFER.B_USER_AVATAR_INFO( mUSER[tUserIndex].uAvatarInfo[index01] );	
+					mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+				}
+				mTRANSFER.B_RCMD_WORLD_SEND();
+				mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+				return;	
+			}
+			if( tResult != 0 )
+			{
+				mTRANSFER.B_LOGIN_RECV( 5, tID, 0, 0, "0000" );
+				mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+				for( index01 = 0 ; index01 < MAX_USER_AVATAR_NUM ; index01++ )
+				{
+					mTRANSFER.B_USER_AVATAR_INFO( mUSER[tUserIndex].uAvatarInfo[index01] );	
+					mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+				}
+				mTRANSFER.B_RCMD_WORLD_SEND();
+				mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+				return;	
+			}
+			mUSER[tUserIndex].uCheckValidState = true;
+			mUSER[tUserIndex].uPlayID = PlayID;
+			mUSER[tUserIndex].uSecondLoginSort = 1;
+			mUSER[tUserIndex].uSecondLoginTryNum = 0;
+			mUSER[tUserIndex].uMoveZoneResult = 0;
+			if (mUSER[tUserIndex].uMousePassword != '')
+			{
+				tMousePassword = '****';
+			}			
+			//console.log("success to login");
+			mTRANSFER.B_LOGIN_RECV( 0, mUSER[tUserIndex].uID, mUSER[tUserIndex].uUserSort, mUSER[tUserIndex].uSecondLoginSort, tMousePassword );
 			mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
-		}
-		mTRANSFER.B_RCMD_WORLD_SEND();
-		mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+			for( index01 = 0 ; index01 < MAX_USER_AVATAR_NUM ; index01++ )
+			{
+				mTRANSFER.B_USER_AVATAR_INFO( mUSER[tUserIndex].uAvatarInfo[index01] );
+				mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+			}
+			mTRANSFER.B_RCMD_WORLD_SEND();
+			mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+		});
 	});
 }
 var W_CLIENT_OK_FOR_LOGIN_SEND = function( tUserIndex )
@@ -128,10 +156,11 @@ var W_CLIENT_OK_FOR_LOGIN_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 }
 var W_CREATE_MOUSE_PASSWORD_SEND = function( tUserIndex )
 {
+	var tPacket = mUSER[tUserIndex].uBUFFER_FOR_RECV;
 	if( !mUSER[tUserIndex].uCheckValidState )
 	{
 		mUSER[tUserIndex].Quit( tUserIndex );
@@ -147,10 +176,10 @@ var W_CREATE_MOUSE_PASSWORD_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 	
 	var tMousePassword = new Buffer( MAX_MOUSE_PASSWORD_LENGTH ).fill( 0 );
-	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
+
 	tPacket.copy( tPacket, 0 , 9, tPacket.length );
 	tPacket.copy( tMousePassword, 0, 0, (MAX_MOUSE_PASSWORD_LENGTH - 1) );
 
@@ -184,10 +213,11 @@ var W_CHANGE_MOUSE_PASSWORD_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 }
 var W_LOGIN_MOUSE_PASSWORD_SEND = function ( tUserIndex )
 {
+	var tPacket = mUSER[tUserIndex].uBUFFER_FOR_RECV;
 	if( !mUSER[tUserIndex].uCheckValidState )
 	{
 		mUSER[tUserIndex].Quit( tUserIndex );
@@ -203,10 +233,9 @@ var W_LOGIN_MOUSE_PASSWORD_SEND = function ( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	//mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
-	
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 	var tMousePassword = new Buffer( MAX_MOUSE_PASSWORD_LENGTH ).fill( 0 );
-	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
+
 	tPacket.copy( tPacket, 0 , 9, tPacket.length );
 	tPacket.copy( tMousePassword, 0, 0, ( MAX_MOUSE_PASSWORD_LENGTH - 1 ) );
 	
@@ -240,6 +269,7 @@ var W_LOGIN_MOUSE_PASSWORD_SEND = function ( tUserIndex )
 }
 var W_CREATE_AVATAR_SEND = function( tUserIndex )
 {
+	var tPacket = mUSER[tUserIndex].uBUFFER_FOR_RECV;
 	if ( !mUSER[tUserIndex].uCheckValidState )
 	{
 		mUSER[tUserIndex].Quit( tUserIndex );
@@ -255,22 +285,20 @@ var W_CREATE_AVATAR_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	mUSER[tUserIndex].mUsedTime = mGAME.GetTickCount();
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 	
 	var index01;
-	var tAvatarPost = new Buffer( 4 ).fill( 0 );
-	var AVATAR_INFO = Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
-	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
+	var AVATAR_INFO = new Buffer.alloc( SIZE_OF_AVATAR_INFO ).fill( 0 );
+	
 	tPacket.copy( tPacket, 0 , 9, tPacket.length );
-	tPacket.copy( tAvatarPost, 0, 0, 4 );
 	tPacket.copy( AVATAR_INFO, 0, 4, SIZE_OF_AVATAR_INFO );
 
-	var tAvatarInfo = pckAvatar( 0, AVATAR_INFO );		
-	tAvatarPost = tAvatarPost.readInt32LE();
+	var tAvatarPost = tPacket.readInt32LE( 0, 4 );
+	var tAvatarInfo = pckAvatar( 0, AVATAR_INFO );
 	console.log("tAvatarPost",tAvatarPost);
 
 	if( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) || ( mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName != '' )
-		|| ( tAvatarInfo.aName == '' ) 
+		|| ( tAvatarInfo.aName == '' )
 		|| ( tAvatarInfo.aTribe < 0 ) || ( tAvatarInfo.aTribe > 2 ) 
 		|| ( tAvatarInfo.aPreviousTribe < 0 ) || ( tAvatarInfo.aPreviousTribe > 2 )
 		|| ( tAvatarInfo.aGender < 0 ) || ( tAvatarInfo.aGender > 1 )
@@ -515,6 +543,7 @@ var W_CREATE_AVATAR_SEND = function( tUserIndex )
 }
 var W_DELETE_AVATAR_SEND = function( tUserIndex )
 {
+	var tPacket = mUSER[tUserIndex].uBUFFER_FOR_RECV;
 	if ( !mUSER[tUserIndex].uCheckValidState )
 	{
 		mUSER[tUserIndex].Quit( tUserIndex );
@@ -530,14 +559,10 @@ var W_DELETE_AVATAR_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	mUSER[tUserIndex].mUsedTime = mGAME.GetTickCount();
-	
-	var tAvatarPost = new Buffer( 4 ).fill( 0 );
-	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+
 	tPacket.copy( tPacket, 0 , 9, tPacket.length );
-	tPacket.copy( tAvatarPost, 0, 0, 4 );
-		
-	tAvatarPost = tAvatarPost.readInt32LE();
+	var tAvatarPost = tPacket.readInt32LE( 0, 4 );
 	console.log("tAvatarPost",tAvatarPost);
 
 	if( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) || ( mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName == '' ) )
@@ -561,6 +586,7 @@ var W_DELETE_AVATAR_SEND = function( tUserIndex )
 }
 var W_DEMAND_ZONE_SERVER_INFO_1_SEND = function( tUserIndex )
 {
+	var tPacket = mUSER[tUserIndex].uBUFFER_FOR_RECV;
 	if (!mUSER[tUserIndex].uCheckValidState)
 	{
 		mUSER[tUserIndex].Quit( tUserIndex );
@@ -578,14 +604,10 @@ var W_DEMAND_ZONE_SERVER_INFO_1_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-	//mUSER[tUserIndex].uUsedTime = GetTickCount();
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
 
-	var tAvatarPost = new Buffer( 4 ).fill( 0 );
-	var tPacket = Buffer( mUSER[tUserIndex].uBUFFER_FOR_RECV );
 	tPacket.copy( tPacket, 0 , 9, tPacket.length );
-	tPacket.copy( tAvatarPost, 0, 0, 4 );
-		
-	tAvatarPost = tAvatarPost.readInt32LE();
+	var tAvatarPost = tPacket.readInt32LE( 0, 4 );
 	console.log("tAvatarPost",tAvatarPost);
 
 	if ( ( tAvatarPost < 0 ) || ( tAvatarPost > 2 ) || ( mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aName == '' ) )
@@ -593,13 +615,36 @@ var W_DEMAND_ZONE_SERVER_INFO_1_SEND = function( tUserIndex )
 		mUSER[tUserIndex].Quit( tUserIndex );
 		return;
 	}
-
-	//mUSER[tUserIndex].mRegisterTime = GetTickCount();
-	mUSER[tUserIndex].uMoveZoneResult = 1;
-	mTRANSFER.B_DEMAND_ZONE_SERVER_INFO_1_RECV( 0, ZONE_IP, ZONE_PO, mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aLogoutInfo[0] );
-	mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+	mCHAR_CONNECT.U_REGISTER_USER_FOR_LOGIN_3_SEND( tUserIndex, tAvatarPost, mUSER[tUserIndex].uPlayID, mUSER[tUserIndex].uID, mUSER[tUserIndex].uAvatarInfo[tAvatarPost]);//, function( tResult )
+	/*{
+		console.log('mRecv_Result', tResult);
+		if ( tResult > 0)
+		{
+			console.log("!Failed to register a character on the char server(%d).", tResult);
+			mUSER[tUserIndex].Quit( tUserIndex );
+			return;
+		}
+		console.log('U_REGISTER_USER_FOR_LOGIN_3_SEND:',tResult);
+		//mUSER[tUserIndex].uRegisterTime = GetTickCount();
+		mUSER[tUserIndex].uMoveZoneResult = 1;
+		mTRANSFER.B_DEMAND_ZONE_SERVER_INFO_1_RECV( 0, ZONE_IP, ZONE_PO, mUSER[tUserIndex].uAvatarInfo[tAvatarPost].aLogoutInfo[0] );
+		mUSER[tUserIndex].Send( tUserIndex, true, mTRANSFER.mOriginal, mTRANSFER.mOriginalSize );
+	});*/
 }
 var W_FAIL_MOVE_ZONE_1_SEND = function( tUserIndex )
 {
+	console.log('W_FAIL_MOVE_ZONE_1_SEND');
+	mUSER[tUserIndex].uUsedTime = mGAME.GetTickCount();
+	mCHAR_CONNECT.U_REGISTER_USER_FOR_LOGIN_2_SEND( mUSER[tUserIndex].uPlayID, mUSER[tUserIndex].uID, function( tResult )
+	{
+		if ( tResult != 0)
+		{
+			console.log("!Failed to register a character on the char server(%d).", tResult);
+			mUSER[tUserIndex].Quit( tUserIndex );
+			return;
+		}
+		//mUSER[tUserIndex].uRegisterTime = GetTickCount();	
+		mUSER[tUserIndex].uMoveZoneResult = 0;
+	});
 }
 module.exports = global;
